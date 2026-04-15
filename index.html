@@ -141,7 +141,7 @@ header {
   /* 3 rows: 0 for fixed flower panel, 1fr for canvas, 0 for fixed right panel */
   grid-template-rows: 0px 1fr 0px;
   overflow: hidden; position: relative; z-index: 2;
-  padding-bottom: 62px; /* keep canvas above the fixed tab bar */
+  padding-bottom: 110px; /* tab bar (62px) + action bar (~48px) */
 }
 
 .panel {
@@ -397,8 +397,8 @@ header {
    BOTTOM BAR — fixed bottom drawer on mobile
    ============================================================ */
 footer {
-  position: fixed; left: 0; right: 0; bottom: 62px;
-  max-height: 58vh; z-index: 300;
+  position: fixed; left: 0; right: 0; bottom: 110px;
+  max-height: calc(100vh - 168px); z-index: 300;
   border-radius: 18px 18px 0 0;
   border: 1px solid rgba(255,255,255,0.15);
   transform: translateY(110%);
@@ -436,7 +436,7 @@ footer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radi
    NOTIFICATIONS
    ============================================================ */
 #notifArea {
-  position: fixed; bottom: 72px; right: 14px; z-index: 900;
+  position: fixed; bottom: 120px; right: 14px; z-index: 900;
   display: flex; flex-direction: column; gap: 8px; pointer-events: none;
 }
 .notif {
@@ -609,8 +609,8 @@ button, .flower-card, .container-opt, .mob-tab,
    ============================================================ */
 #flowerPanel,
 #rightPanel {
-  position: fixed; left: 0; right: 0; bottom: 62px;
-  max-height: 58vh; z-index: 300;
+  position: fixed; left: 0; right: 0; bottom: 110px;
+  max-height: calc(100vh - 168px); z-index: 300;
   border-radius: 18px 18px 0 0;
   border: 1px solid rgba(255,255,255,0.15);
   transform: translateY(110%);
@@ -648,6 +648,17 @@ button, .flower-card, .container-opt, .mob-tab,
 .mob-tab.active { color: #ffd700; }
 .mob-tab-sep { width: 1px; background: rgba(255,255,255,0.08); margin: 14px 0; flex-shrink: 0; }
 
+/* Action buttons: fixed bar on mobile, just above the tab bar */
+.arrangement-actions {
+  position: fixed; bottom: 62px; left: 0; right: 0;
+  z-index: 350;
+  background: rgba(5, 10, 35, 0.92); backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,0.12);
+  padding: 7px 16px 9px;
+  display: flex; gap: 10px; justify-content: center; align-items: center;
+  flex-shrink: 0;
+}
+
 /* ============================================================
    DESKTOP (≥ 721px) — full layout overrides
    ============================================================ */
@@ -672,8 +683,12 @@ button, .flower-card, .container-opt, .mob-tab,
   #flowerGrid { grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; }
   .flower-card img { width: 40px; height: 40px; }
 
-  /* Action buttons: full size */
-  .arrangement-actions { gap: 8px; padding: 6px 12px 8px; }
+  /* Action buttons: back to normal flow on desktop */
+  .arrangement-actions {
+    position: static; bottom: auto; left: auto; right: auto; z-index: auto;
+    background: none; backdrop-filter: none; border-top: none;
+    gap: 8px; padding: 6px 12px 8px;
+  }
   .btn-action { padding: 8px 18px; font-size: 0.8rem; }
 
   /* Delete buttons: smaller on desktop (mouse precision) */
@@ -721,8 +736,8 @@ button, .flower-card, .container-opt, .mob-tab,
   /* Mermaid: visible on desktop */
   #mermaidChar { display: block; }
 
-  /* Notifications: above footer */
-  #notifArea { bottom: 80px; }
+  /* Notifications: above footer on desktop */
+  #notifArea { bottom: 80px; right: 14px; }
 
   /* Game over card: full padding */
   .go-card { padding: 36px 44px; }
@@ -1323,6 +1338,8 @@ function selectContainer(id) {
   }
   renderContainerOptions();
   renderRightPanel();
+  // On mobile: close the container drawer so the user can see the vase update
+  if (_activeDrawer === 'cont') closeMobileDrawer();
 }
 
 /* ============================================================
