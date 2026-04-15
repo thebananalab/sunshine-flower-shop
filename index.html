@@ -79,8 +79,8 @@ body {
 .btn-intro:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(184,127,255,0.55); }
 .btn-intro:active { transform: translateY(0); }
 
-/* Tutorial cards */
-.tutorial-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+/* Tutorial cards — 1 col on mobile */
+.tutorial-grid { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; }
 .tut-card {
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
   border-radius: 12px; padding: 16px 14px;
@@ -94,7 +94,7 @@ body {
    ============================================================ */
 #game {
   position: relative; width: 100%; height: 100vh; overflow: hidden; z-index: 1;
-  display: grid; grid-template-rows: 56px 1fr 68px;
+  display: grid; grid-template-rows: 48px 1fr; /* footer replaced by fixed tab bar on mobile */
 }
 
 /* CORAL DECORATIONS */
@@ -111,24 +111,24 @@ body {
 /* HEADER */
 header {
   grid-row: 1; display: flex; align-items: center; justify-content: space-between;
-  padding: 0 20px; background: rgba(0,0,0,0.25); backdrop-filter: blur(10px);
+  padding: 0 8px; background: rgba(0,0,0,0.25); backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; position: relative;
 }
 .header-title {
-  font-size: 1.15rem; font-weight: 800;
+  font-size: 0.75rem; font-weight: 800;
   background: linear-gradient(90deg, #ffd700, #ff9ec5, #b87fff);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
-.stats { display: flex; align-items: center; gap: 16px; font-size: 0.85rem; }
+.stats { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; }
 .stat {
   display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.08);
-  padding: 4px 10px; border-radius: 20px;
+  padding: 2px 5px; border-radius: 20px; font-size: 0.62rem;
 }
 .mode-toggle {
   display: flex; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);
 }
 .mode-btn {
-  padding: 5px 14px; border: none; cursor: pointer; font-size: 0.78rem; font-weight: 600;
+  padding: 3px 7px; border: none; cursor: pointer; font-size: 0.6rem; font-weight: 600;
   background: transparent; color: rgba(255,255,255,0.6); transition: all 0.2s;
 }
 .mode-btn.active { background: linear-gradient(90deg, #ff9ec5, #b87fff); color: #fff; }
@@ -137,7 +137,7 @@ header {
    MAIN PANELS
    ============================================================ */
 .main-area {
-  grid-row: 2; display: grid; grid-template-columns: 220px 1fr 265px;
+  grid-row: 2; display: grid; grid-template-columns: 1fr;
   overflow: hidden; position: relative; z-index: 2;
 }
 
@@ -156,8 +156,8 @@ header {
 
 /* LEFT — FLOWER PALETTE */
 #flowerGrid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-  padding: 10px; overflow-y: auto; flex: 1;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;
+  padding: 8px; overflow-y: auto; flex: 1;
 }
 #flowerGrid::-webkit-scrollbar { width: 4px; }
 #flowerGrid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
@@ -178,7 +178,7 @@ header {
   0%,100% { box-shadow: 0 0 8px rgba(255,215,0,0.35); }
   50%      { box-shadow: 0 0 18px rgba(255,215,0,0.7); }
 }
-.flower-card img { width: 40px; height: 40px; object-fit: contain; pointer-events: none; }
+.flower-card img { width: 34px; height: 34px; object-fit: contain; pointer-events: none; }
 .flower-card .fname { font-size: 0.62rem; text-align: center; color: rgba(255,255,255,0.75); line-height: 1.2; }
 .flower-card .need-badge {
   position: absolute; top: 4px; right: 4px; background: #ffd700; color: #1a1032;
@@ -218,8 +218,8 @@ header {
   width: 100%; height: 100%; object-fit: contain; pointer-events: none; display: block;
 }
 .del-btn {
-  position: absolute; top: -8px; left: -8px; width: 18px; height: 18px; border-radius: 50%;
-  background: #ff4466; border: none; color: #fff; font-size: 0.65rem; cursor: pointer;
+  position: absolute; top: -12px; left: -12px; width: 24px; height: 24px; border-radius: 50%;
+  background: #ff4466; border: none; color: #fff; font-size: 0.75rem; cursor: pointer;
   display: none; align-items: center; justify-content: center; z-index: 20; line-height: 1;
 }
 .placed-flower.selected .del-btn { display: flex; }
@@ -241,17 +241,17 @@ header {
 #vaseDisplay .resize-handle { display: none; }
 #vaseDisplay.selected .resize-handle { display: block; }
 
-/* Shared resize handle */
+/* Shared resize handle — large touch target on mobile */
 .resize-handle {
-  position: absolute; bottom: -7px; right: -7px; width: 16px; height: 16px;
+  position: absolute; bottom: -13px; right: -13px; width: 26px; height: 26px;
   border-radius: 50%; background: #fff; border: 2px solid #ffd700;
   cursor: se-resize; z-index: 20;
 }
 
-/* Rotate handle */
+/* Rotate handle — large touch target on mobile */
 .rotate-handle {
-  position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
-  width: 16px; height: 16px; border-radius: 50%;
+  position: absolute; top: -32px; left: 50%; transform: translateX(-50%);
+  width: 26px; height: 26px; border-radius: 50%;
   background: #b87fff; border: 2px solid #fff;
   cursor: grab; z-index: 21; display: none;
   box-shadow: 0 0 5px rgba(184,127,255,0.5);
@@ -274,11 +274,11 @@ header {
   width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none;
 }
 
-/* Vase delete button */
+/* Vase delete button — large touch target on mobile */
 .vase-del-btn {
-  position: absolute; top: -8px; left: -8px; width: 18px; height: 18px;
+  position: absolute; top: -12px; left: -12px; width: 24px; height: 24px;
   border-radius: 50%; background: #ff4466; border: none; color: #fff;
-  font-size: 0.65rem; cursor: pointer;
+  font-size: 0.75rem; cursor: pointer;
   display: none; align-items: center; justify-content: center;
   z-index: 20; line-height: 1;
 }
@@ -286,11 +286,11 @@ header {
 
 /* ARRANGEMENT ACTIONS */
 .arrangement-actions {
-  display: flex; gap: 8px; justify-content: center; align-items: center;
-  padding: 6px 12px 8px; flex-shrink: 0;
+  display: flex; gap: 6px; justify-content: center; align-items: center;
+  padding: 4px 8px 8px; flex-shrink: 0;
 }
 .btn-action {
-  padding: 8px 18px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.8rem;
+  padding: 7px 12px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.73rem;
   font-weight: 600; transition: all 0.15s;
 }
 .btn-clear { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
@@ -391,12 +391,19 @@ header {
 .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(184,127,255,0.55); }
 
 /* ============================================================
-   BOTTOM BAR
+   BOTTOM BAR — fixed bottom drawer on mobile
    ============================================================ */
 footer {
-  grid-row: 3; display: flex; align-items: center; gap: 6px; padding: 6px 12px;
-  background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255,255,255,0.1); overflow-x: auto; z-index: 10; position: relative;
+  position: fixed; left: 0; right: 0; bottom: 62px;
+  max-height: 58vh; z-index: 300;
+  border-radius: 18px 18px 0 0;
+  border: 1px solid rgba(255,255,255,0.15);
+  transform: translateY(110%);
+  transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
+  display: flex; flex-wrap: wrap; height: auto;
+  gap: 8px; padding: 12px 10px 16px;
+  background: rgba(10,20,55,0.97); backdrop-filter: blur(16px);
+  overflow-x: auto;
 }
 footer::-webkit-scrollbar { height: 3px; }
 footer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
@@ -404,7 +411,7 @@ footer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radi
   font-size: 0.68rem; color: rgba(255,255,255,0.5); white-space: nowrap;
   text-transform: uppercase; letter-spacing: 0.07em; margin-right: 4px; flex-shrink: 0;
 }
-#containerBar { display: flex; gap: 6px; align-items: center; }
+#containerBar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; }
 .container-opt {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding: 5px 7px; border-radius: 8px; cursor: pointer; flex-shrink: 0;
@@ -426,7 +433,7 @@ footer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radi
    NOTIFICATIONS
    ============================================================ */
 #notifArea {
-  position: fixed; bottom: 80px; right: 14px; z-index: 900;
+  position: fixed; bottom: 72px; right: 14px; z-index: 900;
   display: flex; flex-direction: column; gap: 8px; pointer-events: none;
 }
 .notif {
@@ -465,7 +472,8 @@ footer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radi
 #gameOverlay.show { display: flex; }
 .go-card {
   background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 18px; padding: 36px 44px; text-align: center; max-width: 380px;
+  border-radius: 18px; padding: 28px 24px; text-align: center;
+  width: 90%; max-width: 380px;
 }
 .go-card h2 { font-size: 2rem; margin-bottom: 8px; }
 .go-card p { color: rgba(255,255,255,0.75); font-size: 0.9rem; margin-bottom: 16px; }
@@ -487,12 +495,12 @@ footer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radi
   backdrop-filter: blur(24px);
   border: 2px solid rgba(255,215,0,0.35);
   border-radius: 26px;
-  padding: 32px 44px;
+  padding: 24px 28px;
   text-align: center;
   z-index: 850;
   opacity: 0;
   pointer-events: none;
-  min-width: 300px;
+  width: 88%; max-width: 360px;
   box-shadow: 0 24px 80px rgba(0,0,0,0.55), 0 0 60px rgba(255,215,0,0.08);
   transition: opacity 0.35s cubic-bezier(0.34,1.56,0.64,1),
               transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
@@ -511,8 +519,9 @@ footer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radi
 .popup-msg     { font-size: 0.88rem; color: rgba(255,255,255,0.88); line-height: 1.55; margin-bottom: 10px; }
 .popup-stars   { font-size: 1.4rem; letter-spacing: 3px; }
 
-/* Floating mermaid */
+/* Floating mermaid — hidden on mobile */
 #mermaidChar {
+  display: none;
   position: fixed; right: 12px; bottom: 78px; z-index: 5; width: 105px;
   pointer-events: none; animation: floatChar 4s ease-in-out infinite;
 }
@@ -539,8 +548,8 @@ footer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radi
 }
 #groupSelect.active { display: block; }
 .group-resize-handle {
-  position: absolute; bottom: -10px; right: -10px;
-  width: 22px; height: 22px; border-radius: 50%;
+  position: absolute; bottom: -16px; right: -16px;
+  width: 32px; height: 32px; border-radius: 50%;
   background: #fff; border: 2px solid #b87fff;
   cursor: se-resize; pointer-events: auto; z-index: 801;
   box-shadow: 0 0 6px rgba(184,127,255,0.5);
@@ -583,108 +592,140 @@ button, .flower-card, .container-opt, .mob-tab,
 /* Canvas must not scroll — touch events owned by JS drag handlers */
 #arrangementCanvas { touch-action: none; }
 
-/* ============================================================
-   MOBILE — hidden desktop elements
-   ============================================================ */
-#mobileTabs    { display: none; }
-#drawerBackdrop { display: none; }
+/* Pseudo-element expands tap area to ≥44px without affecting layout */
+.resize-handle::before,
+.rotate-handle::before,
+.group-resize-handle::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+}
 
 /* ============================================================
-   MOBILE RESPONSIVE  (≤ 720px)
+   MOBILE — side panels as fixed bottom drawers (base / default)
    ============================================================ */
-@media (max-width: 720px) {
-  /* Compact header */
-  #game { grid-template-rows: 48px 1fr; } /* footer replaced by fixed tab bar */
-  header { padding: 0 8px; }
-  .header-title { font-size: 0.75rem; }
-  .stats { gap: 4px; }
-  .stat { padding: 2px 5px; font-size: 0.62rem; }
-  .mode-btn { padding: 3px 7px; font-size: 0.6rem; }
+#flowerPanel,
+#rightPanel {
+  position: fixed; left: 0; right: 0; bottom: 62px;
+  max-height: 58vh; z-index: 300;
+  border-radius: 18px 18px 0 0;
+  border: 1px solid rgba(255,255,255,0.15);
+  transform: translateY(110%);
+  transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
+}
+#flowerPanel { display: flex; flex-direction: column; overflow: hidden; }
+#rightPanel  { overflow-y: auto; background: rgba(255,255,255,0.06); backdrop-filter: blur(12px); }
 
-  /* Single-column canvas */
-  .main-area { grid-template-columns: 1fr; }
+/* Drawer open state */
+.drawer-open { transform: translateY(0) !important; }
 
-  /* Side panels → fixed bottom drawers */
-  #flowerPanel,
-  #rightPanel,
-  footer {
-    position: fixed; left: 0; right: 0; bottom: 62px;
-    max-height: 58vh; z-index: 300;
-    border-radius: 18px 18px 0 0;
-    border: 1px solid rgba(255,255,255,0.15);
-    transform: translateY(110%);
-    transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  #flowerPanel { display: flex; flex-direction: column; overflow: hidden; }
-  #rightPanel  { overflow-y: auto; }
-  footer {
-    display: flex; flex-wrap: wrap; height: auto;
-    gap: 8px; padding: 12px 10px 16px;
-    background: rgba(10,20,55,0.97); backdrop-filter: blur(16px);
-  }
-  #containerBar { flex-wrap: wrap; gap: 6px; justify-content: center; }
+/* Drawer backdrop */
+#drawerBackdrop {
+  position: fixed; inset: 0; z-index: 299;
+  background: rgba(0,0,0,0.5);
+  display: none;
+}
+#drawerBackdrop.show { display: block; }
 
-  /* Drawer open state */
-  .drawer-open { transform: translateY(0) !important; }
+/* Mobile tab bar — visible by default (mobile-first) */
+#mobileTabs {
+  display: flex;
+  position: fixed; bottom: 0; left: 0; right: 0; height: 62px; z-index: 400;
+  background: rgba(4,8,28,0.97); backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.mob-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  border: none; background: transparent; color: rgba(255,255,255,0.5);
+  font-size: 0.56rem; font-weight: 700; cursor: pointer; letter-spacing: 0.03em;
+  transition: color 0.15s; padding: 0; text-transform: uppercase;
+}
+.mob-tab .ti { font-size: 1.3rem; line-height: 1; display: block; }
+.mob-tab.active { color: #ffd700; }
+.mob-tab-sep { width: 1px; background: rgba(255,255,255,0.08); margin: 14px 0; flex-shrink: 0; }
 
-  /* Backdrop */
-  #drawerBackdrop {
-    position: fixed; inset: 0; z-index: 299;
-    background: rgba(0,0,0,0.5);
-  }
-  #drawerBackdrop.show { display: block; }
+/* ============================================================
+   DESKTOP (≥ 721px) — full layout overrides
+   ============================================================ */
+@media (min-width: 721px) {
+  /* Tutorial: 2 columns */
+  .tutorial-grid { grid-template-columns: 1fr 1fr; }
 
-  /* Mobile tab bar */
-  #mobileTabs {
-    display: flex;
-    position: fixed; bottom: 0; left: 0; right: 0; height: 62px; z-index: 400;
-    background: rgba(4,8,28,0.97); backdrop-filter: blur(18px);
-    border-top: 1px solid rgba(255,255,255,0.1);
-  }
-  .mob-tab {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 2px;
-    border: none; background: transparent; color: rgba(255,255,255,0.5);
-    font-size: 0.56rem; font-weight: 700; cursor: pointer; letter-spacing: 0.03em;
-    transition: color 0.15s; padding: 0; text-transform: uppercase;
-  }
-  .mob-tab .ti { font-size: 1.3rem; line-height: 1; display: block; }
-  .mob-tab.active { color: #ffd700; }
-  .mob-tab-sep { width: 1px; background: rgba(255,255,255,0.08); margin: 14px 0; flex-shrink: 0; }
+  /* Game grid: restore footer row */
+  #game { grid-template-rows: 56px 1fr 68px; }
 
-  /* Mermaid hidden on mobile */
-  #mermaidChar { display: none; }
+  /* Header: full size */
+  header { padding: 0 20px; }
+  .header-title { font-size: 1.15rem; }
+  .stats { gap: 16px; }
+  .stat { padding: 4px 10px; font-size: 0.85rem; }
+  .mode-btn { padding: 5px 14px; font-size: 0.78rem; }
 
-  /* Larger touch targets for handles */
-  .resize-handle       { width: 26px; height: 26px; bottom: -13px; right: -13px; }
-  .rotate-handle       { width: 26px; height: 26px; top: -32px; }
-  .group-resize-handle { width: 32px; height: 32px; bottom: -16px; right: -16px; }
+  /* Main: 3-column layout */
+  .main-area { grid-template-columns: 220px 1fr 265px; }
 
-  /* Pseudo-element expands tap area to ≥44px without affecting layout */
-  .resize-handle::before,
-  .rotate-handle::before,
-  .group-resize-handle::before {
-    content: '';
-    position: absolute;
-    inset: -10px;
-  }
+  /* Flower grid: 2 columns, larger images */
+  #flowerGrid { grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; }
+  .flower-card img { width: 40px; height: 40px; }
 
-  /* Delete buttons: bigger on mobile */
+  /* Action buttons: full size */
+  .arrangement-actions { gap: 8px; padding: 6px 12px 8px; }
+  .btn-action { padding: 8px 18px; font-size: 0.8rem; }
+
+  /* Delete buttons: smaller on desktop (mouse precision) */
   .del-btn, .vase-del-btn {
-    width: 24px; height: 24px; font-size: 0.75rem;
-    top: -12px; left: -12px;
+    width: 18px; height: 18px; font-size: 0.65rem;
+    top: -8px; left: -8px;
   }
 
-  /* Flower grid: 3 columns */
-  #flowerGrid { grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px; }
-  .flower-card img { width: 34px; height: 34px; }
+  /* Handles: smaller on desktop */
+  .resize-handle       { width: 16px; height: 16px; bottom: -7px; right: -7px; }
+  .rotate-handle       { width: 16px; height: 16px; top: -24px; }
+  .group-resize-handle { width: 22px; height: 22px; bottom: -10px; right: -10px; }
 
-  /* Compact action buttons */
-  .arrangement-actions { padding: 4px 8px; gap: 6px; }
-  .btn-action { padding: 7px 12px; font-size: 0.73rem; }
+  /* Side panels: back to normal flow */
+  #flowerPanel,
+  #rightPanel {
+    position: static;
+    max-height: none;
+    border-radius: 0;
+    border: none;
+    transform: none;
+    transition: none;
+  }
+  #rightPanel { background: rgba(255,255,255,0.04) !important; }
 
-  /* Notification placement above tab bar */
-  #notifArea { bottom: 72px; }
+  /* Footer: normal grid row */
+  footer {
+    grid-row: 3;
+    position: static;
+    max-height: none;
+    border-radius: 0;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    transform: none;
+    transition: none;
+    flex-wrap: nowrap;
+    gap: 6px; padding: 6px 12px;
+    background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
+    align-items: center;
+  }
+  #containerBar { flex-wrap: nowrap; justify-content: flex-start; }
+
+  /* Mobile tab bar: hidden on desktop */
+  #mobileTabs { display: none; }
+
+  /* Mermaid: visible on desktop */
+  #mermaidChar { display: block; }
+
+  /* Notifications: above footer */
+  #notifArea { bottom: 80px; }
+
+  /* Game over card: full padding */
+  .go-card { padding: 36px 44px; }
+
+  /* Customer popup: full size */
+  .customer-popup { padding: 32px 44px; width: auto; min-width: 300px; }
 }
 </style>
 </head>
