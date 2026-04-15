@@ -141,7 +141,8 @@ header {
   /* 3 rows: 0 for fixed flower panel, 1fr for canvas, 0 for fixed right panel */
   grid-template-rows: 0px 1fr 0px;
   /* No overflow:hidden on mobile — it clips hit-areas of position:fixed drawers on iOS Safari */
-  overflow: visible; position: relative; z-index: 2;
+  /* No z-index — removing it prevents a stacking context that would trap drawers below the backdrop */
+  overflow: visible; position: relative;
   padding-bottom: 62px; /* keep canvas above the fixed tab bar */
 }
 
