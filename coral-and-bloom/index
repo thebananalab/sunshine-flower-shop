@@ -1,0 +1,2283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sunshine Flower Shop 🌞</title>
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+body {
+  background: linear-gradient(170deg, #0a2a5e 0%, #0a6070 50%, #0d9e8f 100%);
+  color: #fff;
+  user-select: none;
+}
+
+/* ============================================================
+   BUBBLES
+   ============================================================ */
+#bubbleLayer {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+}
+.bubble {
+  position: absolute; bottom: -60px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.6), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.25);
+  animation: rise linear infinite;
+}
+@keyframes rise {
+  to { transform: translateY(-110vh) translateX(var(--drift)); opacity: 0; }
+}
+
+/* ============================================================
+   INTRO OVERLAY
+   ============================================================ */
+#intro {
+  position: fixed; inset: 0; z-index: 1000;
+  background: linear-gradient(170deg, #050f2e 0%, #063040 55%, #085048 100%);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.7s ease;
+}
+#intro.fade-out { opacity: 0; pointer-events: none; }
+
+.intro-slide {
+  display: none; flex-direction: column; align-items: center; gap: 20px;
+  max-width: 680px; width: 95%; max-height: 95vh; overflow-y: auto; padding: 12px;
+}
+.intro-slide.active { display: flex; }
+
+.intro-title {
+  font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 900; text-align: center;
+  background: linear-gradient(90deg, #ffd700, #ff9ec5, #b87fff, #ffd700);
+  background-size: 200%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerText 3s linear infinite;
+}
+@keyframes shimmerText { to { background-position: 200% center; } }
+
+.intro-card {
+  background: rgba(255,255,255,0.07); backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 18px;
+  padding: 28px 32px; width: 100%; line-height: 1.75; font-size: 0.97rem; color: #e8f4ff;
+}
+.intro-card p { margin-bottom: 10px; }
+.intro-card p:last-child { margin-bottom: 0; }
+.cherry-name { color: #ffd700; font-weight: 700; font-size: 1.05em; }
+
+.btn-intro {
+  padding: 14px 36px; border: none; border-radius: 50px; cursor: pointer; font-size: 1.05rem;
+  font-weight: 700; background: linear-gradient(90deg, #ff9ec5, #b87fff);
+  color: #fff; letter-spacing: 0.03em;
+  box-shadow: 0 4px 20px rgba(184,127,255,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-intro:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(184,127,255,0.55); }
+.btn-intro:active { transform: translateY(0); }
+
+/* Tutorial cards */
+.tutorial-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+.tut-card {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px; padding: 16px 14px;
+}
+.tut-card .tut-icon { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+.tut-card h4 { color: #ffd700; font-size: 0.88rem; margin-bottom: 5px; }
+.tut-card p { font-size: 0.8rem; color: #c8e0f4; line-height: 1.5; }
+
+/* ============================================================
+   GAME WRAPPER
+   ============================================================ */
+#game {
+  position: relative; width: 100%; height: 100vh; overflow: hidden; z-index: 1;
+  display: grid; grid-template-rows: 56px 1fr 68px;
+}
+
+/* CORAL DECORATIONS */
+#coralDeco {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 120px;
+  display: flex; align-items: flex-end; gap: 0; pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+#coralDeco img {
+  height: auto; max-height: 110px;
+  filter: drop-shadow(0 -4px 8px rgba(0,200,180,0.25));
+}
+
+/* HEADER */
+header {
+  grid-row: 1; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; background: rgba(0,0,0,0.25); backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; position: relative;
+}
+.header-title {
+  font-size: 1.15rem; font-weight: 800;
+  background: linear-gradient(90deg, #ffd700, #ff9ec5, #b87fff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.stats { display: flex; align-items: center; gap: 16px; font-size: 0.85rem; }
+.stat {
+  display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.08);
+  padding: 4px 10px; border-radius: 20px;
+}
+.mode-toggle {
+  display: flex; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);
+}
+.mode-btn {
+  padding: 5px 14px; border: none; cursor: pointer; font-size: 0.78rem; font-weight: 600;
+  background: transparent; color: rgba(255,255,255,0.6); transition: all 0.2s;
+}
+.mode-btn.active { background: linear-gradient(90deg, #ff9ec5, #b87fff); color: #fff; }
+
+/* ============================================================
+   MAIN PANELS
+   ============================================================ */
+.main-area {
+  grid-row: 2; display: grid; grid-template-columns: 220px 1fr 265px;
+  overflow: hidden; position: relative; z-index: 2;
+}
+
+.panel {
+  display: flex; flex-direction: column; overflow: hidden;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06); backdrop-filter: blur(12px);
+}
+.panel:last-child { border-right: none; border-left: 1px solid rgba(255,255,255,0.08); }
+
+.panel-header {
+  padding: 10px 14px; font-size: 0.78rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.55);
+  border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+}
+
+/* LEFT — FLOWER PALETTE */
+#flowerGrid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  padding: 10px; overflow-y: auto; flex: 1;
+}
+#flowerGrid::-webkit-scrollbar { width: 4px; }
+#flowerGrid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+.flower-card {
+  background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 8px 6px; display: flex; flex-direction: column;
+  align-items: center; gap: 4px; cursor: grab; transition: all 0.2s;
+  position: relative;
+}
+.flower-card:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+.flower-card.needed {
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255,215,0,0.4);
+  animation: pulse-gold 1.4s ease-in-out infinite;
+}
+@keyframes pulse-gold {
+  0%,100% { box-shadow: 0 0 8px rgba(255,215,0,0.35); }
+  50%      { box-shadow: 0 0 18px rgba(255,215,0,0.7); }
+}
+.flower-card img { width: 40px; height: 40px; object-fit: contain; pointer-events: none; }
+.flower-card .fname { font-size: 0.62rem; text-align: center; color: rgba(255,255,255,0.75); line-height: 1.2; }
+.flower-card .need-badge {
+  position: absolute; top: 4px; right: 4px; background: #ffd700; color: #1a1032;
+  font-size: 0.6rem; font-weight: 800; border-radius: 8px; padding: 1px 5px; display: none;
+}
+.flower-card.needed .need-badge { display: block; }
+
+/* CENTER — CANVAS */
+#canvasPanel {
+  background: transparent !important; border: none !important; position: relative; overflow: visible;
+}
+.canvas-wrap {
+  display: flex; flex-direction: column; height: 100%; gap: 0;
+}
+#arrangementCanvas {
+  position: relative; flex: 1; overflow: visible;
+  border: 2px dashed rgba(255,255,255,0.1); border-radius: 8px; margin: 8px;
+  min-height: 0;
+}
+#canvasHint {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  pointer-events: none; flex-direction: column; gap: 8px; opacity: 0.4;
+}
+#canvasHint .hint-icon { font-size: 2.2rem; }
+#canvasHint .hint-text { font-size: 0.78rem; text-align: center; line-height: 1.5; }
+
+/* PLACED FLOWERS */
+.placed-flower {
+  position: absolute; cursor: grab;
+  display: flex; align-items: center; justify-content: center;
+  outline: 2px solid transparent; border-radius: 4px;
+  transition: outline 0.1s;
+  /* transform is set entirely via JS to include rotation */
+}
+.placed-flower.selected { outline: 2px dashed rgba(255,215,0,0.85); }
+.placed-flower img {
+  width: 100%; height: 100%; object-fit: contain; pointer-events: none; display: block;
+}
+.del-btn {
+  position: absolute; top: -8px; left: -8px; width: 18px; height: 18px; border-radius: 50%;
+  background: #ff4466; border: none; color: #fff; font-size: 0.65rem; cursor: pointer;
+  display: none; align-items: center; justify-content: center; z-index: 20; line-height: 1;
+}
+.placed-flower.selected .del-btn { display: flex; }
+.placed-flower .resize-handle { display: none; }
+.placed-flower.selected .resize-handle { display: block; }
+
+/* VASE DISPLAY */
+#vaseDisplay {
+  position: absolute; cursor: grab; z-index: 3;
+  display: flex; align-items: center; justify-content: center;
+}
+#vaseDisplay.selected::before {
+  content: ''; position: absolute; inset: -6px;
+  border: 2px dashed rgba(255,215,0,0.8); border-radius: 6px; pointer-events: none;
+}
+#vaseDisplay .vase-img {
+  width: 100%; height: 100%; object-fit: contain; pointer-events: none; display: block;
+}
+#vaseDisplay .resize-handle { display: none; }
+#vaseDisplay.selected .resize-handle { display: block; }
+
+/* Shared resize handle */
+.resize-handle {
+  position: absolute; bottom: -7px; right: -7px; width: 16px; height: 16px;
+  border-radius: 50%; background: #fff; border: 2px solid #ffd700;
+  cursor: se-resize; z-index: 20;
+}
+
+/* Rotate handle */
+.rotate-handle {
+  position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #b87fff; border: 2px solid #fff;
+  cursor: grab; z-index: 21; display: none;
+  box-shadow: 0 0 5px rgba(184,127,255,0.5);
+}
+.rotate-handle::after {
+  content: '↻'; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: #fff; line-height: 1;
+}
+.placed-flower.selected .rotate-handle { display: block; }
+#vaseDisplay.selected .rotate-handle   { display: block; }
+
+/* Vase front depth layer (sibling of vaseDisplay, higher z-index) */
+#vaseFront {
+  position: absolute; pointer-events: none;
+  display: none; align-items: center; justify-content: center;
+  z-index: 500; /* above all resting flowers (10-200) */
+}
+#vaseFront img {
+  width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none;
+}
+
+/* Vase delete button */
+.vase-del-btn {
+  position: absolute; top: -8px; left: -8px; width: 18px; height: 18px;
+  border-radius: 50%; background: #ff4466; border: none; color: #fff;
+  font-size: 0.65rem; cursor: pointer;
+  display: none; align-items: center; justify-content: center;
+  z-index: 20; line-height: 1;
+}
+#vaseDisplay.selected .vase-del-btn { display: flex; }
+
+/* ARRANGEMENT ACTIONS */
+.arrangement-actions {
+  display: flex; gap: 8px; justify-content: center; align-items: center;
+  padding: 6px 12px 8px; flex-shrink: 0;
+}
+.btn-action {
+  padding: 8px 18px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.8rem;
+  font-weight: 600; transition: all 0.15s;
+}
+.btn-clear { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+.btn-clear:hover { background: rgba(255,100,100,0.25); color: #fff; }
+.btn-deliver {
+  background: linear-gradient(90deg, #ffd700, #ffb347); color: #1a1032;
+  box-shadow: 0 3px 12px rgba(255,215,0,0.35);
+}
+.btn-deliver:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(255,215,0,0.5); }
+
+/* ============================================================
+   RIGHT PANEL — TICKET
+   ============================================================ */
+#rightPanel {
+  padding: 8px; overflow-y: auto; overflow-x: hidden;
+  background: rgba(255,255,255,0.04) !important;
+}
+#rightPanel::-webkit-scrollbar { width: 4px; }
+#rightPanel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+/* Ticket */
+.ticket {
+  background: #fffef0; color: #1a1032; border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.5) inset;
+  font-family: 'Courier New', monospace; overflow: hidden;
+}
+.ticket-header {
+  background: linear-gradient(135deg, #0a2a5e, #0a6070);
+  color: #fff; padding: 12px 14px; text-align: center;
+}
+.ticket-header .shop-name { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; }
+.ticket-header .shop-sub { font-size: 0.68rem; color: rgba(255,255,255,0.65); margin-top: 2px; }
+
+.ticket-holes {
+  display: flex; gap: 7px; padding: 4px 8px;
+  background: linear-gradient(135deg, #0a2a5e, #0a6070);
+  align-items: center;
+}
+.ticket-holes::before, .ticket-holes::after {
+  content: ''; flex: 1; border-top: 2px dashed rgba(255,255,255,0.35);
+}
+.hole { width: 10px; height: 10px; border-radius: 50%; background: #fffef0; flex-shrink: 0; }
+
+.ticket-body { padding: 12px 14px; font-size: 0.8rem; }
+.ticket-customer { text-align: center; padding-bottom: 10px; }
+.cust-avatar { font-size: 2.4rem; display: block; }
+.cust-name { font-weight: 700; font-size: 0.9rem; margin: 4px 0 2px; color: #0a2a5e; }
+.cust-speech { font-style: italic; font-size: 0.75rem; color: #555; line-height: 1.4; }
+
+.t-dash { border: none; border-top: 2px dashed #c8c0a0; margin: 8px 0; }
+.t-section-label {
+  text-align: center; font-size: 0.68rem; letter-spacing: 0.12em; color: #888;
+  font-variant: small-caps; margin-bottom: 8px;
+}
+.order-item {
+  display: flex; align-items: center; gap: 7px; padding: 4px 0;
+  border-bottom: 1px dotted #e0d8c0;
+}
+.order-item:last-child { border-bottom: none; }
+.order-item img { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }
+.order-item .item-name { flex: 1; font-size: 0.75rem; }
+.order-item .item-qty { font-size: 0.72rem; color: #888; }
+.order-item .item-check { margin-left: auto; font-size: 0.85rem; }
+
+.container-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 0;
+}
+.container-row img { width: 28px; height: 28px; object-fit: contain; }
+.container-row .c-label { flex: 1; font-size: 0.75rem; }
+.container-row .c-status { font-size: 0.85rem; }
+
+.queue-label {
+  font-size: 0.65rem; letter-spacing: 0.1em; color: #888; font-variant: small-caps;
+  text-align: center; margin-bottom: 6px;
+}
+.queue-bubbles { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.queue-bubble {
+  font-size: 1.4rem; background: rgba(10,42,94,0.07); border-radius: 50%;
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+}
+
+/* Free mode panel */
+.free-panel {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 16px 12px; text-align: center; color: rgba(255,255,255,0.9);
+}
+.free-panel h3 { font-size: 1rem; }
+.free-mermaid { font-size: 3rem; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.free-panel p { font-size: 0.8rem; color: rgba(255,255,255,0.65); line-height: 1.5; }
+.btn-save {
+  padding: 11px 24px; border: none; border-radius: 50px; cursor: pointer;
+  background: linear-gradient(90deg, #ff9ec5, #b87fff); color: #fff;
+  font-size: 0.88rem; font-weight: 700;
+  box-shadow: 0 4px 14px rgba(184,127,255,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(184,127,255,0.55); }
+
+/* ============================================================
+   BOTTOM BAR
+   ============================================================ */
+footer {
+  grid-row: 3; display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+  background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,0.1); overflow-x: auto; z-index: 10; position: relative;
+}
+footer::-webkit-scrollbar { height: 3px; }
+footer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+.footer-label {
+  font-size: 0.68rem; color: rgba(255,255,255,0.5); white-space: nowrap;
+  text-transform: uppercase; letter-spacing: 0.07em; margin-right: 4px; flex-shrink: 0;
+}
+#containerBar { display: flex; gap: 6px; align-items: center; }
+.container-opt {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 5px 7px; border-radius: 8px; cursor: pointer; flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+  transition: all 0.18s;
+}
+.container-opt:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); }
+.container-opt.selected {
+  border-color: #ffd700; background: rgba(255,215,0,0.12);
+  box-shadow: 0 0 10px rgba(255,215,0,0.3);
+}
+.container-opt img { width: 30px; height: 30px; object-fit: contain; }
+.container-opt span {
+  font-size: 0.55rem; color: rgba(255,255,255,0.65); text-align: center;
+  max-width: 50px; line-height: 1.2;
+}
+
+/* ============================================================
+   NOTIFICATIONS
+   ============================================================ */
+#notifArea {
+  position: fixed; bottom: 80px; right: 14px; z-index: 900;
+  display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.notif {
+  background: rgba(10,20,50,0.92); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+  animation: slideIn 0.3s ease, fadeOut 0.4s ease 2.6s forwards;
+  max-width: 280px; pointer-events: auto;
+}
+@keyframes slideIn { from { transform: translateX(40px); opacity: 0; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateX(20px); } }
+.notif-icon { font-size: 1.4rem; }
+.notif-body .notif-title { font-size: 0.8rem; font-weight: 700; color: #fff; }
+.notif-body .notif-msg { font-size: 0.72rem; color: rgba(255,255,255,0.7); margin-top: 2px; }
+
+/* SCORE POP */
+.score-pop {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 3rem; font-weight: 900; pointer-events: none; z-index: 999;
+  background: linear-gradient(90deg, #ffd700, #ff9ec5);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: popAnim 1s ease forwards;
+}
+@keyframes popAnim {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.5); }
+  30%  { opacity: 1; transform: translate(-50%,-60%) scale(1.2); }
+  70%  { opacity: 1; transform: translate(-50%,-70%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%,-90%) scale(0.9); }
+}
+
+/* GAME OVER */
+#gameOverlay {
+  position: fixed; inset: 0; background: rgba(5,15,46,0.88); backdrop-filter: blur(8px);
+  z-index: 950; display: none; align-items: center; justify-content: center;
+}
+#gameOverlay.show { display: flex; }
+.go-card {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 18px; padding: 36px 44px; text-align: center; max-width: 380px;
+}
+.go-card h2 { font-size: 2rem; margin-bottom: 8px; }
+.go-card p { color: rgba(255,255,255,0.75); font-size: 0.9rem; margin-bottom: 16px; }
+.btn-restart {
+  padding: 12px 32px; border: none; border-radius: 50px; cursor: pointer;
+  background: linear-gradient(90deg, #ffd700, #ffb347); color: #1a1032;
+  font-size: 0.95rem; font-weight: 700; box-shadow: 0 4px 18px rgba(255,215,0,0.4);
+  transition: transform 0.15s;
+}
+.btn-restart:hover { transform: translateY(-2px); }
+
+/* ============================================================
+   CUSTOMER THANK-YOU POPUP
+   ============================================================ */
+.customer-popup {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.7);
+  background: rgba(8,20,50,0.96);
+  backdrop-filter: blur(24px);
+  border: 2px solid rgba(255,215,0,0.35);
+  border-radius: 26px;
+  padding: 32px 44px;
+  text-align: center;
+  z-index: 850;
+  opacity: 0;
+  pointer-events: none;
+  min-width: 300px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.55), 0 0 60px rgba(255,215,0,0.08);
+  transition: opacity 0.35s cubic-bezier(0.34,1.56,0.64,1),
+              transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.customer-popup.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.customer-popup.hide {
+  opacity: 0;
+  transform: translate(-50%, -56%) scale(0.88);
+  transition: opacity 0.28s ease-in, transform 0.28s ease-in;
+}
+.popup-avatar  { font-size: 4rem; display: block; margin-bottom: 10px; }
+.popup-name    { font-size: 1.05rem; font-weight: 800; color: #ffd700; margin-bottom: 8px; }
+.popup-msg     { font-size: 0.88rem; color: rgba(255,255,255,0.88); line-height: 1.55; margin-bottom: 10px; }
+.popup-stars   { font-size: 1.4rem; letter-spacing: 3px; }
+
+/* Floating mermaid */
+#mermaidChar {
+  position: fixed; right: 12px; bottom: 78px; z-index: 5; width: 105px;
+  pointer-events: none; animation: floatChar 4s ease-in-out infinite;
+}
+#mermaidChar img { width: 100%; height: auto; display: block; }
+@keyframes floatChar {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-12px) rotate(3deg); }
+}
+
+/* Shop name tag on canvas (free mode) */
+#shopTag {
+  position: absolute; bottom: 8px; left: 0; right: 0; text-align: center;
+  pointer-events: none; font-family: 'Courier New', monospace;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.45); z-index: 2; display: none;
+}
+
+/* Group select overlay */
+#groupSelect {
+  position: absolute; display: none; pointer-events: none;
+  border: 2px dashed rgba(255,255,255,0.5); border-radius: 8px;
+  z-index: 800;
+  box-shadow: 0 0 0 1px rgba(184,127,255,0.2);
+}
+#groupSelect.active { display: block; }
+.group-resize-handle {
+  position: absolute; bottom: -10px; right: -10px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; border: 2px solid #b87fff;
+  cursor: se-resize; pointer-events: auto; z-index: 801;
+  box-shadow: 0 0 6px rgba(184,127,255,0.5);
+}
+.group-resize-handle::after {
+  content: '⤡'; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #b87fff; line-height: 1;
+}
+
+/* Select-all button in free panel */
+.btn-select-all {
+  padding: 9px 20px; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 20px;
+  cursor: pointer; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9);
+  font-size: 0.82rem; font-weight: 600; transition: all 0.15s; width: 100%;
+}
+.btn-select-all:hover { background: rgba(184,127,255,0.22); border-color: #b87fff; color: #fff; }
+
+/* Print / save mode */
+@media print {
+  header, footer, #flowerPanel, #rightPanel, .arrangement-actions,
+  #coralDeco, #mermaidChar, #bubbleLayer { display: none !important; }
+  .main-area { grid-template-columns: 0 1fr 0 !important; }
+}
+body.print-mode header,
+body.print-mode footer,
+body.print-mode #flowerPanel,
+body.print-mode #rightPanel,
+body.print-mode .arrangement-actions,
+body.print-mode #coralDeco,
+body.print-mode #mermaidChar,
+body.print-mode #bubbleLayer { display: none !important; }
+body.print-mode .main-area { grid-template-columns: 0 1fr 0 !important; }
+
+/* Remove 300ms tap delay on interactive controls */
+button, .flower-card, .container-opt, .mob-tab,
+.btn-intro, .btn-action, .btn-save, .btn-select-all,
+#drawerBackdrop { touch-action: manipulation; }
+
+/* ============================================================
+   MOBILE — hidden desktop elements
+   ============================================================ */
+#mobileTabs    { display: none; }
+#drawerBackdrop { display: none; }
+
+/* ============================================================
+   MOBILE RESPONSIVE  (≤ 720px)
+   ============================================================ */
+@media (max-width: 720px) {
+  /* Compact header */
+  #game { grid-template-rows: 48px 1fr; } /* footer replaced by fixed tab bar */
+  header { padding: 0 8px; }
+  .header-title { font-size: 0.75rem; }
+  .stats { gap: 4px; }
+  .stat { padding: 2px 5px; font-size: 0.62rem; }
+  .mode-btn { padding: 3px 7px; font-size: 0.6rem; }
+
+  /* Single-column canvas */
+  .main-area { grid-template-columns: 1fr; }
+
+  /* Side panels → fixed bottom drawers */
+  #flowerPanel,
+  #rightPanel,
+  footer {
+    position: fixed; left: 0; right: 0; bottom: 62px;
+    max-height: 58vh; z-index: 300;
+    border-radius: 18px 18px 0 0;
+    border: 1px solid rgba(255,255,255,0.15);
+    transform: translateY(110%);
+    transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  #flowerPanel { display: flex; flex-direction: column; overflow: hidden; }
+  #rightPanel  { overflow-y: auto; }
+  footer {
+    display: flex; flex-wrap: wrap; height: auto;
+    gap: 8px; padding: 12px 10px 16px;
+    background: rgba(10,20,55,0.97); backdrop-filter: blur(16px);
+  }
+  #containerBar { flex-wrap: wrap; gap: 6px; justify-content: center; }
+
+  /* Drawer open state */
+  .drawer-open { transform: translateY(0) !important; }
+
+  /* Backdrop */
+  #drawerBackdrop {
+    position: fixed; inset: 0; z-index: 299;
+    background: rgba(0,0,0,0.5);
+  }
+  #drawerBackdrop.show { display: block; }
+
+  /* Mobile tab bar */
+  #mobileTabs {
+    display: flex;
+    position: fixed; bottom: 0; left: 0; right: 0; height: 62px; z-index: 400;
+    background: rgba(4,8,28,0.97); backdrop-filter: blur(18px);
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .mob-tab {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+    border: none; background: transparent; color: rgba(255,255,255,0.5);
+    font-size: 0.56rem; font-weight: 700; cursor: pointer; letter-spacing: 0.03em;
+    transition: color 0.15s; padding: 0; text-transform: uppercase;
+  }
+  .mob-tab .ti { font-size: 1.3rem; line-height: 1; display: block; }
+  .mob-tab.active { color: #ffd700; }
+  .mob-tab-sep { width: 1px; background: rgba(255,255,255,0.08); margin: 14px 0; flex-shrink: 0; }
+
+  /* Mermaid hidden on mobile */
+  #mermaidChar { display: none; }
+
+  /* Larger touch targets for handles */
+  .resize-handle       { width: 22px; height: 22px; bottom: -11px; right: -11px; }
+  .rotate-handle       { width: 22px; height: 22px; top: -30px; }
+  .group-resize-handle { width: 28px; height: 28px; bottom: -14px; right: -14px; }
+
+  /* Flower grid: 3 columns */
+  #flowerGrid { grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px; }
+  .flower-card img { width: 34px; height: 34px; }
+
+  /* Compact action buttons */
+  .arrangement-actions { padding: 4px 8px; gap: 6px; }
+  .btn-action { padding: 7px 12px; font-size: 0.73rem; }
+
+  /* Notification placement above tab bar */
+  #notifArea { bottom: 72px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Bubble layer -->
+<div id="bubbleLayer"></div>
+
+<!-- ============================================================
+     INTRO OVERLAY
+     ============================================================ -->
+<div id="intro">
+  <!-- Slide 1: Welcome -->
+  <div class="intro-slide active" id="slide1">
+    <div class="intro-title">☀️ Sunshine Flower Shop ☀️</div>
+
+    <div class="intro-card">
+      <p>Hola <span class="cherry-name">Cherrylove</span> 💕</p>
+      <p>Sé que tu sueño sería tener una floristería… ¡e imagínate si fuera debajo del mar! 🌊</p>
+      <p>Bueno, como ese sueño no puede hacerse realidad (lo del mar complica un poco las cosas 😄), te he creado un mini juego de cumpleaños donde puedes armar arreglos de flores submarinos para los clientes más exquisitos del océano. 🌸🦀🐙</p>
+      <p>También tienes la opción de crear libremente y descargar tus arreglos. 🎨</p>
+      <p>¡Feliz cumpleaños! 🎂✨</p>
+    </div>
+
+    <button class="btn-intro" onclick="goSlide2()">Ver cómo jugar →</button>
+  </div>
+
+  <!-- Slide 2: Tutorial -->
+  <div class="intro-slide" id="slide2">
+    <div class="intro-title">🐚 Cómo jugar</div>
+
+    <div class="tutorial-grid">
+      <div class="tut-card">
+        <span class="tut-icon">📋</span>
+        <h4>Modo Pedidos</h4>
+        <p>Los clientes del mar llegan con pedidos especiales en forma de ticket. Mira qué flores y contenedor piden, arma el arreglo y presiona ¡Entregar!</p>
+      </div>
+      <div class="tut-card">
+        <span class="tut-icon">🌿</span>
+        <h4>Arrastra las flores</h4>
+        <p>Arrástralas desde el panel izquierdo hasta el canvas, o haz clic para añadirlas al centro. Muévelas y redimensiónalas con el circulito de la esquina.</p>
+      </div>
+      <div class="tut-card">
+        <span class="tut-icon">🏺</span>
+        <h4>El contenedor</h4>
+        <p>¡El contenedor del canvas también se mueve y redimensiona! Arrástralo y ponlo donde mejor quede. Recuerda elegir el tipo correcto en la barra de abajo.</p>
+      </div>
+      <div class="tut-card">
+        <span class="tut-icon">🎨</span>
+        <h4>Modo Libre</h4>
+        <p>Sin reglas ni pedidos. Crea el arreglo que quieras y descárgalo cuando estés lista.</p>
+      </div>
+    </div>
+
+    <button class="btn-intro" onclick="startGame()">¡Empezar! 🌊</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     GAME
+     ============================================================ -->
+<div id="game">
+  <!-- Coral decorations (fixed, behind everything) -->
+  <div id="coralDeco">
+    <img src="../assets/Fondo/corals-07.svg" alt="">
+    <img src="../assets/Fondo/corals-08.svg" alt="">
+    <img src="../assets/Fondo/corals-14.svg" alt="">
+    <img src="../assets/Fondo/corals-17.svg" alt="">
+    <img src="../assets/Fondo/corals-18.svg" alt="">
+    <img src="../assets/Fondo/corals-19.svg" alt="">
+    <img src="../assets/Fondo/corals-20.svg" alt="">
+  </div>
+
+  <!-- Floating mermaid character -->
+  <div id="mermaidChar"><img id="mermaidImg" src="../assets/character/mermaid-1.svg" alt="Mermaid"></div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-title">🌞 Sunshine Flower Shop</div>
+    <div class="stats">
+      <div class="stat">
+        <span id="heartsDisplay">❤️❤️❤️❤️❤️</span>
+      </div>
+      <div class="stat">
+        <span>⭐</span><span id="scoreDisplay">0</span>
+      </div>
+      <div class="stat">
+        <span>🪙</span><span id="coinsDisplay">0</span>
+      </div>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btnOrders" onclick="setMode('orders')">📋 Pedidos</button>
+      <button class="mode-btn" id="btnFree" onclick="setMode('free')">🎨 Libre</button>
+    </div>
+  </header>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+    <!-- LEFT: Flower Palette -->
+    <div class="panel" id="flowerPanel">
+      <div class="panel-header">🌸 Flores</div>
+      <div id="flowerGrid"></div>
+    </div>
+
+    <!-- CENTER: Canvas -->
+    <div class="panel" id="canvasPanel">
+      <div class="canvas-wrap">
+        <div id="arrangementCanvas">
+          <div id="canvasHint">
+            <div class="hint-icon">🌊</div>
+            <div class="hint-text">Arrastra flores aquí~<br>o haz clic para añadir</div>
+          </div>
+          <!-- Vase -->
+          <div id="vaseDisplay">
+            <img class="vase-img" src="../assets/Contenedores/corals-04.svg" draggable="false" alt="Conch Shell">
+            <button class="vase-del-btn" id="vaseDelBtn">✕</button>
+            <div class="rotate-handle" id="vaseRotate"></div>
+            <div class="resize-handle" id="vaseResize"></div>
+          </div>
+          <!-- Front depth layer — rendered above flowers for depth effect -->
+          <div id="vaseFront"></div>
+          <!-- Group select overlay (free mode) -->
+          <div id="groupSelect">
+            <div class="group-resize-handle" id="groupResize"></div>
+          </div>
+          <!-- Shop name watermark (free mode) -->
+          <div id="shopTag">☀️ Gracias por comprar en Sunshine Flower Shop ☀️</div>
+        </div>
+        <div class="arrangement-actions">
+          <button class="btn-action btn-clear" onclick="clearArrangement()">🗑 Limpiar</button>
+          <button class="btn-action btn-deliver" id="btnDeliver" onclick="onDeliverClick()">🌟 ¡Entregar!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Order ticket / Free panel -->
+    <div class="panel" id="rightPanel"></div>
+  </div>
+
+  <!-- FOOTER: Container selector -->
+  <footer>
+    <div class="footer-label">🏺 Contenedor:</div>
+    <div id="containerBar"></div>
+  </footer>
+
+  <!-- MOBILE TAB BAR (visible only on small screens via CSS) -->
+  <div id="mobileTabs">
+    <button class="mob-tab" id="mobTabFlowers" onclick="toggleMobileDrawer('flowers')">
+      <span class="ti">🌸</span>Flores
+    </button>
+    <div class="mob-tab-sep"></div>
+    <button class="mob-tab" id="mobTabOrder" onclick="toggleMobileDrawer('order')">
+      <span class="ti">📋</span>Pedido
+    </button>
+    <div class="mob-tab-sep"></div>
+    <button class="mob-tab" id="mobTabCont" onclick="toggleMobileDrawer('cont')">
+      <span class="ti">🏺</span>Contenedor
+    </button>
+  </div>
+</div>
+
+<!-- DRAWER BACKDROP (mobile) -->
+<div id="drawerBackdrop" onclick="closeMobileDrawer()"></div>
+
+<!-- NOTIFICATIONS -->
+<div id="notifArea"></div>
+
+<!-- CUSTOMER THANK-YOU POPUP -->
+<div id="customerPopup" class="customer-popup">
+  <span class="popup-avatar" id="popupAvatar"></span>
+  <div class="popup-name"    id="popupName"></div>
+  <div class="popup-msg"     id="popupMsg">¡Muchas gracias! Es justo lo que quería 🌸</div>
+  <div class="popup-stars">⭐⭐⭐⭐⭐</div>
+</div>
+
+<!-- GAME OVER OVERLAY -->
+<div id="gameOverlay">
+  <div class="go-card">
+    <h2>🌊 Fin del turno</h2>
+    <p id="goMsg">¡El mar se llevó tus flores! Perdiste todos los corazones.</p>
+    <p id="goScore" style="font-size:1.1rem; font-weight:700; color:#ffd700;"></p>
+    <button class="btn-restart" onclick="restartGame()">🌸 Volver a jugar</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   TOUCH SUPPORT — targeted drag bridge for canvas interactions
+   ============================================================ */
+/**
+ * Wraps a mousedown handler so it also fires on touchstart.
+ * While the touch is active, redirects touchmove/touchend on document
+ * to mousemove/mouseup so all existing drag handlers work unchanged.
+ * Returns a function to use as the touchstart listener.
+ */
+function touchDrag(handler) {
+  return function onTouchStart(e) {
+    const t = e.touches[0];
+    e.preventDefault(); // block scroll + native mouse-compat events during drag
+    // Build a synthetic event-like object the handler can use
+    const syn = {
+      type: 'mousedown',
+      clientX: t.clientX, clientY: t.clientY,
+      target: e.target,
+      preventDefault()  { e.preventDefault(); },
+      stopPropagation() { e.stopPropagation(); },
+    };
+    handler(syn);
+
+    // While this touch is live, forward move/end as document mouse events
+    function onTM(te) {
+      te.preventDefault();
+      const tt = te.touches[0];
+      document.dispatchEvent(new MouseEvent('mousemove', {
+        bubbles: true, cancelable: true,
+        clientX: tt.clientX, clientY: tt.clientY, view: window,
+      }));
+    }
+    function onTE(te) {
+      document.removeEventListener('touchmove', onTM);
+      document.removeEventListener('touchend',  onTE);
+      const tt = te.changedTouches[0];
+      document.dispatchEvent(new MouseEvent('mouseup', {
+        bubbles: true, cancelable: true,
+        clientX: tt.clientX, clientY: tt.clientY, view: window,
+      }));
+    }
+    document.addEventListener('touchmove', onTM, { passive: false });
+    document.addEventListener('touchend',  onTE);
+  };
+}
+
+/* ============================================================
+   MOBILE DRAWER — panel slide-up on small screens
+   ============================================================ */
+let _activeDrawer = null;
+
+function toggleMobileDrawer(which) {
+  if (_activeDrawer === which) { closeMobileDrawer(); return; }
+  closeMobileDrawer(true); // silent close
+
+  const panelMap = {
+    flowers: document.getElementById('flowerPanel'),
+    order:   document.getElementById('rightPanel'),
+    cont:    document.querySelector('footer'),
+  };
+  const tabMap = {
+    flowers: document.getElementById('mobTabFlowers'),
+    order:   document.getElementById('mobTabOrder'),
+    cont:    document.getElementById('mobTabCont'),
+  };
+
+  const panel = panelMap[which];
+  if (!panel) return;
+  panel.classList.add('drawer-open');
+  tabMap[which]?.classList.add('active');
+  document.getElementById('drawerBackdrop').classList.add('show');
+  _activeDrawer = which;
+}
+
+function closeMobileDrawer(silent) {
+  ['flowerPanel', 'rightPanel'].forEach(id =>
+    document.getElementById(id)?.classList.remove('drawer-open'));
+  document.querySelector('footer')?.classList.remove('drawer-open');
+  ['mobTabFlowers', 'mobTabOrder', 'mobTabCont'].forEach(id =>
+    document.getElementById(id)?.classList.remove('active'));
+  if (!silent) document.getElementById('drawerBackdrop')?.classList.remove('show');
+  _activeDrawer = null;
+}
+
+/* ============================================================
+   DATA
+   ============================================================ */
+const FLOWERS = [
+  { id:'f01', name:'Sea Anemone',    img:'../assets/Plantas-flores/corals-01.svg', color:'#ff69b4' },
+  { id:'f02', name:'Coral Bloom',    img:'../assets/Plantas-flores/corals-02.svg', color:'#ff6b35' },
+  { id:'f03', name:'Sea Grass',      img:'../assets/Plantas-flores/corals-03.svg', color:'#4caf50' },
+  { id:'f05', name:'Pearl Blossom',  img:'../assets/Plantas-flores/corals-05.svg', color:'#e8e8f0' },
+  { id:'f06', name:'Sea Lavender',   img:'../assets/Plantas-flores/corals-06.svg', color:'#9b59b6' },
+  { id:'f09', name:'Bubble Flower',  img:'../assets/Plantas-flores/corals-09.svg', color:'#87ceeb' },
+  { id:'f10', name:'Star Bloom',     img:'../assets/Plantas-flores/corals-10.svg', color:'#ffd700' },
+  { id:'f11', name:'Jelly Bell',     img:'../assets/Plantas-flores/corals-11.svg', color:'#da70d6' },
+  { id:'f12', name:'Ocean Rose',     img:'../assets/Plantas-flores/corals-12.svg', color:'#e74c3c' },
+  { id:'f15', name:'Tide Lily',      img:'../assets/Plantas-flores/corals-15.svg', color:'#f39c12' },
+  { id:'f22', name:'Reef Orchid',    img:'../assets/Plantas-flores/corals-22.svg', color:'#8e44ad' },
+  { id:'f23', name:'Wave Peony',     img:'../assets/Plantas-flores/corals-23.svg', color:'#e91e8c' },
+  { id:'f24', name:'Shell Daisy',    img:'../assets/Plantas-flores/corals-24.svg', color:'#fff176' },
+  { id:'f25', name:'Foam Tulip',     img:'../assets/Plantas-flores/corals-25.svg', color:'#b2dfdb' },
+  { id:'f28', name:'Coral Fern',     img:'../assets/Plantas-flores/corals-28.svg', color:'#388e3c' },
+  { id:'f33', name:'Deep Violet',    img:'../assets/Plantas-flores/corals-33.svg', color:'#5c6bc0' },
+  { id:'f35', name:"Mermaid's Kiss", img:'../assets/Plantas-flores/corals-35.svg', color:'#f48fb1' },
+  { id:'f36', name:'Sea Poppy',      img:'../assets/Plantas-flores/corals-36.svg', color:'#ef5350' },
+];
+
+// frontClip: fraction of container height (from top) that renders IN FRONT of flowers,
+// simulating a vase/bottle/jar "mouth" through which flowers appear to emerge.
+const CONTAINERS = [
+  { id:'c04', name:'Conch Shell',  img:'../assets/Contenedores/corals-04.svg' },
+  { id:'c13', name:'Giant Clam',   img:'../assets/Contenedores/corals-13.svg' },
+  { id:'c16', name:'Coral Pot',    img:'../assets/Contenedores/corals-16.svg', frontClip: 0.18 },
+  { id:'c26', name:'Sea Bottle',   img:'../assets/Contenedores/corals-26.svg', frontClip: 0.32 },
+  { id:'c27', name:'Urchin Vase',  img:'../assets/Contenedores/corals-27.svg', frontClip: 0.24 },
+  { id:'c29', name:'Star Bowl',    img:'../assets/Contenedores/corals-29.svg' },
+  { id:'c30', name:'Drift Jar',    img:'../assets/Contenedores/corals-30.svg', frontClip: 0.22 },
+  { id:'c31', name:'Pebble Vase',  img:'../assets/Contenedores/corals-31.svg', frontClip: 0.20 },
+  { id:'c32', name:'Kelp Basket',  img:'../assets/Contenedores/corals-32.svg' },
+  { id:'c34', name:'Crystal Pot',  img:'../assets/Contenedores/corals-34.svg', frontClip: 0.22 },
+];
+
+const CUSTOMERS = [
+  { name:'Capitán Cangrejo',   emoji:'🦀', speech:'¡Quiero algo bien rojo y bravo, matey!' },
+  { name:'Señora Medusa',      emoji:'🪼', speech:'Algo etéreo y luminoso, por favor~' },
+  { name:'Don Pulpo',          emoji:'🐙', speech:'¡Ocho flores si es posible! O las que quepan.' },
+  { name:'Princesa Estrella',  emoji:'⭐', speech:'Que todo brille como el fondo del mar.' },
+  { name:'Nemo Jr.',           emoji:'🐠', speech:'¡Colores vivos! Como mi aleta.' },
+  { name:'Tortuga Coral',      emoji:'🐢', speech:'Algo tranquilo y verde, sin prisa.' },
+  { name:'Reina Anguila',      emoji:'🐍', speech:'Oscuro y misterioso, por supuesto.' },
+  { name:'El Caballito',       emoji:'🐴', speech:'¡Elegante y delicado, como yo!' },
+  { name:'Ballena Azul',       emoji:'🐋', speech:'Grande y hermoso, ¡como el océano!' },
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const S = {
+  mode: 'orders',
+  coins: 0,
+  score: 0,
+  hearts: 5,
+  selectedContainer: 'c04',
+  arrangement: [],      // [{ id, x, y, size, z, uid, rotation }]
+  vase: { x: 0, y: 0, size: 90, rotation: 0 },
+  vaseVisible: true,
+  groupMode:   false,
+  selectedUid: null,    // null | number | 'vase'
+  zCounter: 10,
+  currentCustomer: null,
+  currentOrder: null,
+  queue: [],
+  ordersCompleted: 0,
+};
+let uidCounter = 0;
+
+/* ============================================================
+   INTRO NAVIGATION
+   ============================================================ */
+function goSlide2() {
+  document.getElementById('slide1').classList.remove('active');
+  document.getElementById('slide2').classList.add('active');
+}
+
+function startGame() {
+  const intro = document.getElementById('intro');
+  intro.classList.add('fade-out');
+  setTimeout(() => {
+    intro.style.display = 'none';
+    requestAnimationFrame(() => initVase());
+  }, 700);
+}
+
+/* ============================================================
+   BUBBLES
+   ============================================================ */
+function spawnBubbles() {
+  const layer = document.getElementById('bubbleLayer');
+  for (let i = 0; i < 24; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size  = 6 + Math.random() * 26;
+    const dur   = 9 + Math.random() * 18;
+    const delay = Math.random() * 16;
+    const left  = Math.random() * 100;
+    const drift = (Math.random() - 0.5) * 80;
+    b.style.cssText =
+      `width:${size}px; height:${size}px; left:${left}%;` +
+      `animation-duration:${dur}s; animation-delay:-${delay}s;` +
+      `--drift:${drift}px;`;
+    layer.appendChild(b);
+  }
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+function init() {
+  spawnBubbles();
+  renderFlowerPalette();
+  renderContainerOptions();
+  fillQueue();
+  renderRightPanel();
+  updateCanvasHint();
+  updateStats();
+
+  // Mermaid frame animation
+  let mermaidFrame = 1;
+  setInterval(() => {
+    mermaidFrame = mermaidFrame === 1 ? 2 : 1;
+    const img = document.getElementById('mermaidImg');
+    if (img) img.src = `../assets/character/mermaid-${mermaidFrame}.svg`;
+  }, 650);
+
+  // Canvas background click → deselect (and exit group mode)
+  const canvas = document.getElementById('arrangementCanvas');
+  canvas.addEventListener('mousedown', (e) => {
+    const t = e.target;
+    const isCanvas = t === canvas;
+    const isHint   = t === document.getElementById('canvasHint') ||
+                     t.classList.contains('hint-icon') ||
+                     t.classList.contains('hint-text');
+    const isShopTag    = t === document.getElementById('shopTag');
+    const isGroupSelect = t === document.getElementById('groupSelect');
+    if (isCanvas || isHint || isShopTag) selectItem(null);
+    // Clicking on the group-select border (not handle) just keeps group mode
+    if (isGroupSelect) { /* do nothing — keep group mode active */ }
+  });
+
+  // Group resize handle
+  const gr = document.getElementById('groupResize');
+  gr.addEventListener('mousedown', onGroupResizeMouseDown);
+  gr.addEventListener('touchstart', touchDrag(onGroupResizeMouseDown), { passive: false });
+
+  // Canvas: deselect on touch background
+  canvas.addEventListener('touchstart', (e) => {
+    const t = e.target;
+    const isCanvas   = t === canvas;
+    const isHint     = t === document.getElementById('canvasHint') ||
+                       t.classList.contains('hint-icon') || t.classList.contains('hint-text');
+    const isShopTag  = t === document.getElementById('shopTag');
+    if (isCanvas || isHint || isShopTag) { selectItem(null); }
+  }, { passive: true });
+}
+
+/* ============================================================
+   VASE INIT & UPDATE
+   ============================================================ */
+function initVase() {
+  const canvas = document.getElementById('arrangementCanvas');
+  const rect   = canvas.getBoundingClientRect();
+  S.vase.x    = rect.width  / 2;
+  S.vase.y    = rect.height - 58;
+  S.vase.size = 90;
+  updateVaseDisplay();
+
+  const vd = document.getElementById('vaseDisplay');
+  vd.addEventListener('mousedown', onVaseMouseDown);
+  vd.addEventListener('touchstart', touchDrag(onVaseMouseDown), { passive: false });
+
+  const vr = document.getElementById('vaseResize');
+  vr.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+    onResizeMouseDown(e, 'vase');
+  });
+  vr.addEventListener('touchstart', touchDrag((e) => {
+    e.stopPropagation();
+    onResizeMouseDown(e, 'vase');
+  }), { passive: false });
+
+  const vRot = document.getElementById('vaseRotate');
+  vRot.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+    onRotateMouseDown(e, 'vase');
+  });
+  vRot.addEventListener('touchstart', touchDrag((e) => {
+    e.stopPropagation();
+    onRotateMouseDown(e, 'vase');
+  }), { passive: false });
+
+  const vDel = document.getElementById('vaseDelBtn');
+  vDel.addEventListener('mousedown', (e) => { e.stopPropagation(); deleteVase(); });
+  vDel.addEventListener('touchstart', (e) => {
+    e.stopPropagation(); e.preventDefault();
+    deleteVase();
+  }, { passive: false });
+}
+
+function updateVaseDisplay() {
+  const c  = CONTAINERS.find(c => c.id === S.selectedContainer);
+  const vd = document.getElementById('vaseDisplay');
+  if (!vd) return;
+  vd.style.left      = S.vase.x + 'px';
+  vd.style.top       = S.vase.y + 'px';
+  vd.style.width     = S.vase.size + 'px';
+  vd.style.height    = S.vase.size + 'px';
+  vd.style.transform = `translate(-50%, -50%) rotate(${S.vase.rotation || 0}deg)`;
+  // Depth containers: render vase ON TOP of flowers (z=500) so the SVG's natural
+  // transparency acts as the "opening" — flowers show through transparent areas,
+  // opaque areas hide flower stems, creating the "inside the container" illusion.
+  vd.style.zIndex    = (c && c.frontClip) ? '500' : '3';
+  // #vaseFront is no longer used — hide it
+  const vf = document.getElementById('vaseFront');
+  if (vf) vf.style.display = 'none';
+}
+
+// Kept for backwards compatibility but no longer does anything visible
+function updateVaseFront() {
+  const vf = document.getElementById('vaseFront');
+  if (vf) vf.style.display = 'none';
+}
+
+/* ============================================================
+   FLOWER PALETTE
+   ============================================================ */
+function renderFlowerPalette() {
+  const grid = document.getElementById('flowerGrid');
+  grid.innerHTML = '';
+
+  const needed = (S.mode === 'orders' && S.currentOrder)
+    ? countArr(S.currentOrder.flowers)
+    : {};
+
+  FLOWERS.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'flower-card' + (needed[f.id] ? ' needed' : '');
+    card.dataset.fid = f.id;
+
+    const badge = document.createElement('div');
+    badge.className = 'need-badge';
+    if (needed[f.id]) badge.textContent = '×' + needed[f.id];
+
+    const img = document.createElement('img');
+    img.src = f.img; img.alt = f.name; img.draggable = false;
+
+    const nm = document.createElement('div');
+    nm.className = 'fname';
+    nm.textContent = f.name;
+
+    card.appendChild(badge);
+    card.appendChild(img);
+    card.appendChild(nm);
+    card.addEventListener('mousedown', (e) => onPaletteMouseDown(e, f.id));
+    card.addEventListener('touchstart', touchDrag((e) => onPaletteMouseDown(e, f.id)), { passive: false });
+    grid.appendChild(card);
+  });
+}
+
+/* ============================================================
+   CONTAINER OPTIONS
+   ============================================================ */
+function renderContainerOptions() {
+  const bar = document.getElementById('containerBar');
+  bar.innerHTML = '';
+
+  CONTAINERS.forEach(c => {
+    const opt = document.createElement('div');
+    opt.className = 'container-opt' + (S.selectedContainer === c.id ? ' selected' : '');
+    opt.dataset.cid = c.id;
+
+    const img = document.createElement('img');
+    img.src = c.img; img.alt = c.name;
+
+    const sp = document.createElement('span');
+    sp.textContent = c.name;
+
+    opt.appendChild(img);
+    opt.appendChild(sp);
+    opt.addEventListener('click', () => selectContainer(c.id));
+    bar.appendChild(opt);
+  });
+}
+
+function selectContainer(id) {
+  S.selectedContainer = id;
+  const c = CONTAINERS.find(x => x.id === id);
+  if (c) {
+    const vd  = document.getElementById('vaseDisplay');
+    const img = document.querySelector('#vaseDisplay .vase-img');
+    if (img) { img.src = c.img; img.alt = c.name; }
+    // Re-show vase if it was deleted
+    if (vd && !S.vaseVisible) {
+      S.vaseVisible = true;
+      vd.style.display = '';
+    }
+    updateVaseFront();
+  }
+  renderContainerOptions();
+  renderRightPanel();
+}
+
+/* ============================================================
+   QUEUE & ORDERS
+   ============================================================ */
+function makeOrder() {
+  const shuffled = [...FLOWERS].sort(() => Math.random() - 0.5);
+  const typeCount = 2 + Math.floor(Math.random() * 3); // 2–4 flower types
+  const flowers = [];
+  for (let i = 0; i < typeCount; i++) {
+    const qty = 1 + Math.floor(Math.random() * 2); // 1–2 of each
+    for (let q = 0; q < qty; q++) flowers.push(shuffled[i].id);
+  }
+  const container = CONTAINERS[Math.floor(Math.random() * CONTAINERS.length)];
+  return { flowers, container: container.id };
+}
+
+function fillQueue() {
+  while (S.queue.length < 3) {
+    const custIdx = Math.floor(Math.random() * CUSTOMERS.length);
+    S.queue.push({ customer: CUSTOMERS[custIdx], order: makeOrder() });
+  }
+  if (!S.currentCustomer) nextCustomer();
+}
+
+function nextCustomer() {
+  if (S.queue.length === 0) fillQueue();
+  const entry       = S.queue.shift();
+  S.currentCustomer = entry.customer;
+  S.currentOrder    = entry.order;
+  // Refill queue in background
+  while (S.queue.length < 3) {
+    const custIdx = Math.floor(Math.random() * CUSTOMERS.length);
+    S.queue.push({ customer: CUSTOMERS[custIdx], order: makeOrder() });
+  }
+  renderFlowerPalette();
+  renderRightPanel();
+}
+
+/* ============================================================
+   COUNT HELPER
+   ============================================================ */
+function countArr(arr) {
+  const m = {};
+  arr.forEach(id => { m[id] = (m[id] || 0) + 1; });
+  return m;
+}
+
+/* ============================================================
+   RENDER RIGHT PANEL
+   ============================================================ */
+function renderRightPanel() {
+  const panel = document.getElementById('rightPanel');
+
+  // ---- FREE MODE ----
+  if (S.mode === 'free') {
+    panel.innerHTML = `
+      <div class="free-panel">
+        <h3>🎨 Modo Libre</h3>
+        <img id="freeMermaidImg" src="../assets/character/mermaid-1.svg"
+             style="width:80px;height:auto;animation:float 3s ease-in-out infinite;" alt="Mermaid">
+        <div style="font-size:0.9rem; font-weight:700; color:rgba(255,255,255,0.9);">¡Crea libremente!</div>
+        <p>Sin pedidos ni reglas~ Arrastra flores, mueve y redimensiona todo, y cuando estés lista...</p>
+        <button class="btn-select-all" onclick="selectAll()">📐 Seleccionar todo y escalar</button>
+        <button class="btn-save" onclick="downloadArrangement()">📸 Guardar arreglo</button>
+      </div>`;
+    document.getElementById('btnDeliver').textContent = '📸 Guardar';
+    return;
+  }
+
+  // ---- ORDERS MODE ----
+  document.getElementById('btnDeliver').textContent = '🌟 ¡Entregar!';
+
+  if (!S.currentCustomer || !S.currentOrder) {
+    panel.innerHTML = '<div style="padding:20px; text-align:center; color:rgba(255,255,255,0.5); font-size:0.85rem;">🌊 Cargando pedido...</div>';
+    return;
+  }
+
+  const cust  = S.currentCustomer;
+  const order = S.currentOrder;
+
+  const needed  = countArr(order.flowers);
+  const placed  = countArr(S.arrangement.map(f => f.id));
+
+  const flowerRows = Object.entries(needed).map(([fid, qty]) => {
+    const fData = FLOWERS.find(f => f.id === fid);
+    if (!fData) return '';
+    const have = placed[fid] || 0;
+    const done = have >= qty;
+    const checkHtml = done
+      ? '✅'
+      : `<span style="color:#a09080; font-size:0.7rem;">${have}/${qty}</span>`;
+    return `<div class="order-item">
+      <img src="${fData.img}" alt="${fData.name}">
+      <span class="item-name">${fData.name}</span>
+      <span class="item-qty">×${qty}</span>
+      <span class="item-check">${checkHtml}</span>
+    </div>`;
+  }).join('');
+
+  const cData = CONTAINERS.find(c => c.id === order.container);
+  const cOk   = S.selectedContainer === order.container;
+  const cStatusHtml = cOk
+    ? '✅'
+    : `<span style="color:#c0392b; font-size:0.68rem;">✗ incorrecto</span>`;
+
+  const queueBubbles = S.queue.slice(0, 3).map(q =>
+    `<div class="queue-bubble" title="${q.customer.name}">${q.customer.emoji}</div>`
+  ).join('');
+
+  const holesRow = '<div class="ticket-holes">' +
+    Array(7).fill('<div class="hole"></div>').join('') +
+    '</div>';
+
+  panel.innerHTML = `
+    <div class="ticket">
+      <div class="ticket-header">
+        <div class="shop-name">☀️ SUNSHINE FLOWER SHOP ☀️</div>
+        <div class="shop-sub">🌊 Floristería Submarina</div>
+      </div>
+      ${holesRow}
+      <div class="ticket-body">
+        <div class="ticket-customer">
+          <span class="cust-avatar">${cust.emoji}</span>
+          <div class="cust-name">${cust.name}</div>
+          <div class="cust-speech">"${cust.speech}"</div>
+        </div>
+        <hr class="t-dash">
+        <div class="t-section-label">— Pedido —</div>
+        ${flowerRows}
+        <hr class="t-dash">
+        <div class="container-row">
+          <img src="${cData ? cData.img : ''}" alt="${cData ? cData.name : ''}">
+          <span class="c-label">${cData ? cData.name : '?'}</span>
+          <span class="c-status">${cStatusHtml}</span>
+        </div>
+        <hr class="t-dash">
+        <div class="queue-label">— Próximos clientes —</div>
+        <div class="queue-bubbles">${queueBubbles}</div>
+      </div>
+      ${holesRow}
+    </div>`;
+}
+
+/* ============================================================
+   DELIVER ORDER
+   ============================================================ */
+function onDeliverClick() {
+  if (S.mode === 'free') { downloadArrangement(); return; }
+  deliverOrder();
+}
+
+function deliverOrder() {
+  if (!S.currentOrder) return;
+
+  const needed = countArr(S.currentOrder.flowers);
+  const placed = countArr(S.arrangement.map(f => f.id));
+  const cOk    = S.selectedContainer === S.currentOrder.container;
+
+  let flowerOk = true;
+  for (const [fid, qty] of Object.entries(needed)) {
+    if ((placed[fid] || 0) < qty) { flowerOk = false; break; }
+  }
+
+  if (flowerOk && cOk) {
+    const pts = 100 + S.ordersCompleted * 10;
+    S.score  += pts;
+    S.coins  += 5 + Math.floor(Math.random() * 6);
+    S.ordersCompleted++;
+    showScorePop('+' + pts + ' ⭐');
+    showCustomerPopup(S.currentCustomer);
+    updateStats();
+    clearArrangement();
+    nextCustomer();
+  } else {
+    S.hearts--;
+    updateStats();
+    const issues = [];
+    if (!flowerOk) issues.push('flores incorrectas');
+    if (!cOk)      issues.push('contenedor incorrecto');
+    notify('💔', '¡Pedido incorrecto!', 'Revisa: ' + issues.join(' y '));
+    renderRightPanel();
+    if (S.hearts <= 0) gameOver();
+  }
+}
+
+/* ============================================================
+   SELECT ITEM
+   ============================================================ */
+function selectItem(uid) {
+  // Exit group mode whenever an individual selection is made
+  if (S.groupMode) {
+    S.groupMode = false;
+    const gs = document.getElementById('groupSelect');
+    if (gs) gs.classList.remove('active');
+  }
+  S.selectedUid = uid;
+
+  document.querySelectorAll('.placed-flower').forEach(el => el.classList.remove('selected'));
+  const vd = document.getElementById('vaseDisplay');
+  if (vd) vd.classList.remove('selected');
+
+  if (uid === null) return;
+
+  if (uid === 'vase') {
+    if (vd) vd.classList.add('selected');
+  } else {
+    const el = document.querySelector(`.placed-flower[data-uid="${uid}"]`);
+    if (el) el.classList.add('selected');
+  }
+}
+
+/* ============================================================
+   TRANSFORM HELPER — combines translate + rotate + scale
+   ============================================================ */
+function flowerTransform(rotation, scale = 1) {
+  return `translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`;
+}
+
+/* ============================================================
+   PLACE FLOWER
+   ============================================================ */
+function placeFlower(id, x, y) {
+  if (S.arrangement.length >= 20) {
+    notify('⚠️', 'Canvas lleno', 'Máximo 20 flores. Elimina alguna primero.');
+    return;
+  }
+  const uid      = ++uidCounter;
+  // Random final resting angle: slight tilt like a real bouquet
+  const rotation = (Math.random() - 0.5) * 28;
+  S.zCounter = Math.min(S.zCounter + 1, 490);
+  const item     = { id, x, y, size: 60, z: S.zCounter, uid, rotation };
+  S.arrangement.push(item);
+  const el = createFlowerElement(item);
+  document.getElementById('arrangementCanvas').appendChild(el);
+  selectItem(uid);
+  updateCanvasHint();
+  renderRightPanel();
+  // On mobile: close the flower drawer so the canvas is visible
+  if (_activeDrawer === 'flowers') closeMobileDrawer();
+}
+
+function createFlowerElement(item) {
+  const fData = FLOWERS.find(f => f.id === item.id);
+  const el = document.createElement('div');
+  el.className   = 'placed-flower';
+  el.dataset.uid = item.uid;
+  el.style.left   = item.x + 'px';
+  el.style.top    = item.y + 'px';
+  el.style.width  = item.size + 'px';
+  el.style.height = item.size + 'px';
+  el.style.zIndex = item.z;
+
+  // Pop-in: start tiny, spring to full size + final rotation
+  el.style.transform  = flowerTransform(item.rotation, 0.1);
+  el.style.transition = 'none';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      el.style.transition = 'transform 0.45s cubic-bezier(0.34,1.56,0.64,1)';
+      el.style.transform  = flowerTransform(item.rotation, 1);
+    });
+  });
+
+  const img = document.createElement('img');
+  img.src       = fData ? fData.img : '';
+  img.alt       = fData ? fData.name : '';
+  img.draggable = false;
+
+  const delBtn = document.createElement('button');
+  delBtn.className   = 'del-btn';
+  delBtn.textContent = '✕';
+  delBtn.title       = 'Eliminar';
+  delBtn.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+    removeFlowerByUid(item.uid);
+  });
+  delBtn.addEventListener('touchstart', (e) => {
+    e.stopPropagation(); e.preventDefault();
+    removeFlowerByUid(item.uid);
+  }, { passive: false });
+
+  const rotateHandle = document.createElement('div');
+  rotateHandle.className = 'rotate-handle';
+  rotateHandle.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+    onRotateMouseDown(e, item.uid);
+  });
+  rotateHandle.addEventListener('touchstart', touchDrag((e) => {
+    e.stopPropagation();
+    onRotateMouseDown(e, item.uid);
+  }), { passive: false });
+
+  const resizeHandle = document.createElement('div');
+  resizeHandle.className = 'resize-handle';
+  resizeHandle.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+    onResizeMouseDown(e, item.uid);
+  });
+  resizeHandle.addEventListener('touchstart', touchDrag((e) => {
+    e.stopPropagation();
+    onResizeMouseDown(e, item.uid);
+  }), { passive: false });
+
+  el.appendChild(img);
+  el.appendChild(delBtn);
+  el.appendChild(rotateHandle);
+  el.appendChild(resizeHandle);
+  el.addEventListener('mousedown', (e) => onFlowerMouseDown(e, item.uid));
+  el.addEventListener('touchstart', touchDrag((e) => onFlowerMouseDown(e, item.uid)), { passive: false });
+  return el;
+}
+
+/* ============================================================
+   PALETTE DRAG & DROP
+   ============================================================ */
+function onPaletteMouseDown(e, id) {
+  e.preventDefault();
+  const startX = e.clientX, startY = e.clientY;
+  let dragging  = false;
+  let prevGhostX = e.clientX;
+
+  const fData = FLOWERS.find(f => f.id === id);
+  const ghost = document.createElement('div');
+  ghost.style.cssText =
+    'position:fixed; pointer-events:none; z-index:9999; width:56px; height:56px;' +
+    'opacity:0.82; transform:translate(-50%,-50%); transition:transform 0.08s ease;';
+  ghost.innerHTML = `<img src="${fData ? fData.img : ''}" style="width:100%;height:100%;object-fit:contain;">`;
+  document.body.appendChild(ghost);
+  ghost.style.left = e.clientX + 'px';
+  ghost.style.top  = e.clientY + 'px';
+
+  function onMove(ev) {
+    const vx   = ev.clientX - prevGhostX;
+    prevGhostX = ev.clientX;
+    const tilt = Math.max(-28, Math.min(28, vx * 2.2));
+
+    ghost.style.left      = ev.clientX + 'px';
+    ghost.style.top       = ev.clientY + 'px';
+    ghost.style.transform = `translate(-50%,-50%) rotate(${tilt}deg)`;
+
+    const dx = ev.clientX - startX, dy = ev.clientY - startY;
+    if (!dragging && Math.sqrt(dx*dx + dy*dy) > 6) dragging = true;
+  }
+
+  function onUp(ev) {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    ghost.remove();
+
+    const canvas = document.getElementById('arrangementCanvas');
+    const rect   = canvas.getBoundingClientRect();
+
+    if (dragging) {
+      const cx = ev.clientX - rect.left;
+      const cy = ev.clientY - rect.top;
+      if (cx >= 0 && cy >= 0 && cx <= rect.width && cy <= rect.height) {
+        placeFlower(id, cx, cy);
+      }
+    } else {
+      // Simple click — add at canvas center
+      placeFlower(id, rect.width / 2, rect.height / 2 - 20);
+    }
+  }
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+/* ============================================================
+   FLOWER MOVE
+   ============================================================ */
+function onFlowerMouseDown(e, uid) {
+  if (e.target.classList.contains('del-btn') ||
+      e.target.classList.contains('resize-handle') ||
+      e.target.classList.contains('rotate-handle')) return;
+  e.preventDefault();
+  e.stopPropagation();
+  selectItem(uid);
+
+  const item = S.arrangement.find(f => f.uid === uid);
+  if (!item) return;
+  S.zCounter = Math.min(S.zCounter + 1, 490);
+  item.z = S.zCounter;
+  const el = document.querySelector(`.placed-flower[data-uid="${uid}"]`);
+  // Boost above depth vase layer (z=500) while dragging so user can see flower
+  if (el) el.style.zIndex = 1000;
+
+  const startMouseX = e.clientX, startMouseY = e.clientY;
+  const startX = item.x, startY = item.y;
+  const canvas  = document.getElementById('arrangementCanvas');
+
+  // Tilt tracking
+  let prevMX      = e.clientX;
+  let tiltTimeout = null;
+
+  function onMove(ev) {
+    const rect = canvas.getBoundingClientRect();
+    const nx = startX + (ev.clientX - startMouseX);
+    const ny = startY + (ev.clientY - startMouseY);
+    item.x = Math.max(0, Math.min(rect.width,  nx));
+    item.y = Math.max(0, Math.min(rect.height, ny));
+
+    // Velocity-based tilt on top of stored rotation
+    const vx      = ev.clientX - prevMX;
+    prevMX        = ev.clientX;
+    const tiltDeg = Math.max(-30, Math.min(30, vx * 2.2));
+    const base    = item.rotation || 0;
+
+    if (el) {
+      el.style.left       = item.x + 'px';
+      el.style.top        = item.y + 'px';
+      el.style.transition = 'transform 0.08s ease';
+      el.style.transform  = flowerTransform(base + tiltDeg, 1);
+    }
+
+    // Auto-level if mouse slows down
+    clearTimeout(tiltTimeout);
+    tiltTimeout = setTimeout(() => {
+      if (el) {
+        el.style.transition = 'transform 0.2s ease';
+        el.style.transform  = flowerTransform(base, 1);
+      }
+    }, 100);
+  }
+
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    clearTimeout(tiltTimeout);
+    if (el) {
+      // Restore proper z-index (below vase front depth layer at 500)
+      el.style.zIndex = item.z;
+      // Spring back to final resting rotation
+      el.style.transition = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1)';
+      el.style.transform  = flowerTransform(item.rotation || 0, 1);
+    }
+  }
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+/* ============================================================
+   VASE MOVE
+   ============================================================ */
+function onVaseMouseDown(e) {
+  if (e.target.classList.contains('resize-handle') ||
+      e.target.classList.contains('rotate-handle') ||
+      e.target.classList.contains('vase-del-btn')) return;
+  e.preventDefault();
+  e.stopPropagation();
+  selectItem('vase');
+
+  const startMouseX = e.clientX, startMouseY = e.clientY;
+  const startX = S.vase.x, startY = S.vase.y;
+  const canvas  = document.getElementById('arrangementCanvas');
+  const vd      = document.getElementById('vaseDisplay');
+
+  function onMove(ev) {
+    const rect = canvas.getBoundingClientRect();
+    const nx = startX + (ev.clientX - startMouseX);
+    const ny = startY + (ev.clientY - startMouseY);
+    S.vase.x = Math.max(0, Math.min(rect.width,  nx));
+    S.vase.y = Math.max(0, Math.min(rect.height, ny));
+    if (vd) { vd.style.left = S.vase.x + 'px'; vd.style.top = S.vase.y + 'px'; }
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+/* ============================================================
+   RESIZE — flowers & vase, distance-from-center method
+   ============================================================ */
+function onResizeMouseDown(e, uid) {
+  e.preventDefault();
+  e.stopPropagation();
+  selectItem(uid);
+
+  const isVase = uid === 'vase';
+  const item   = isVase ? S.vase : S.arrangement.find(f => f.uid === uid);
+  if (!item) return;
+
+  const el = isVase
+    ? document.getElementById('vaseDisplay')
+    : document.querySelector(`.placed-flower[data-uid="${uid}"]`);
+
+  const canvas    = document.getElementById('arrangementCanvas');
+  const rect      = canvas.getBoundingClientRect();
+  const centerX   = rect.left + item.x;
+  const centerY   = rect.top  + item.y;
+  const startDist = Math.hypot(e.clientX - centerX, e.clientY - centerY) || 1;
+  const startSize = item.size;
+
+  function onMove(ev) {
+    const dist    = Math.hypot(ev.clientX - centerX, ev.clientY - centerY);
+    const newSize = Math.max(28, Math.min(240, startSize * (dist / startDist)));
+    item.size = newSize;
+    if (el) { el.style.width = newSize + 'px'; el.style.height = newSize + 'px'; }
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+/* ============================================================
+   GROUP SELECT & SCALE (free mode)
+   ============================================================ */
+function getArrangementBounds() {
+  const items = S.arrangement;
+  const hasVase = S.vaseVisible !== false;
+  if (items.length === 0 && !hasVase) return null;
+
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+  items.forEach(item => {
+    const hs = item.size / 2;
+    minX = Math.min(minX, item.x - hs);
+    minY = Math.min(minY, item.y - hs);
+    maxX = Math.max(maxX, item.x + hs);
+    maxY = Math.max(maxY, item.y + hs);
+  });
+
+  if (hasVase) {
+    const hs = S.vase.size / 2;
+    minX = Math.min(minX, S.vase.x - hs);
+    minY = Math.min(minY, S.vase.y - hs);
+    maxX = Math.max(maxX, S.vase.x + hs);
+    maxY = Math.max(maxY, S.vase.y + hs);
+  }
+
+  return { minX, minY, maxX, maxY, w: maxX - minX, h: maxY - minY,
+           cx: (minX + maxX) / 2, cy: (minY + maxY) / 2 };
+}
+
+function updateGroupSelect() {
+  const gs = document.getElementById('groupSelect');
+  if (!gs) return;
+  if (!S.groupMode) { gs.classList.remove('active'); return; }
+  const b = getArrangementBounds();
+  if (!b) { gs.classList.remove('active'); return; }
+  const pad = 14;
+  gs.style.left   = (b.minX - pad) + 'px';
+  gs.style.top    = (b.minY - pad) + 'px';
+  gs.style.width  = (b.w + pad * 2) + 'px';
+  gs.style.height = (b.h + pad * 2) + 'px';
+  gs.classList.add('active');
+}
+
+function selectAll() {
+  if (S.arrangement.length === 0 && S.vaseVisible === false) {
+    notify('⚠️', 'Nada que seleccionar', 'Añade flores al arreglo primero.');
+    return;
+  }
+  S.groupMode = true;
+  // Deselect any individual item without triggering group mode exit
+  S.selectedUid = null;
+  document.querySelectorAll('.placed-flower').forEach(el => el.classList.remove('selected'));
+  const vd = document.getElementById('vaseDisplay');
+  if (vd) vd.classList.remove('selected');
+  updateGroupSelect();
+  notify('📐', 'Todo seleccionado', 'Arrastra la esquina ⤡ para escalar el arreglo completo.');
+}
+
+function onGroupResizeMouseDown(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (!S.groupMode) return;
+
+  const b = getArrangementBounds();
+  if (!b) return;
+
+  const canvas    = document.getElementById('arrangementCanvas');
+  const rect      = canvas.getBoundingClientRect();
+  const screenCX  = rect.left + b.cx;
+  const screenCY  = rect.top  + b.cy;
+  const startDist = Math.hypot(e.clientX - screenCX, e.clientY - screenCY) || 1;
+
+  // Snapshot all starting positions + sizes
+  const snapFlowers = S.arrangement.map(item => ({
+    uid: item.uid, size: item.size, x: item.x, y: item.y,
+  }));
+  const snapVase = { size: S.vase.size, x: S.vase.x, y: S.vase.y };
+
+  function onMove(ev) {
+    const dist  = Math.hypot(ev.clientX - screenCX, ev.clientY - screenCY);
+    const scale = Math.max(0.15, Math.min(5, dist / startDist));
+
+    // Scale each flower: size + position relative to group center
+    S.arrangement.forEach(item => {
+      const snap = snapFlowers.find(s => s.uid === item.uid);
+      if (!snap) return;
+      item.size = Math.max(18, Math.min(300, snap.size * scale));
+      item.x    = b.cx + (snap.x - b.cx) * scale;
+      item.y    = b.cy + (snap.y - b.cy) * scale;
+      const el = document.querySelector(`.placed-flower[data-uid="${item.uid}"]`);
+      if (el) {
+        el.style.left   = item.x + 'px';
+        el.style.top    = item.y + 'px';
+        el.style.width  = item.size + 'px';
+        el.style.height = item.size + 'px';
+      }
+    });
+
+    // Scale vase
+    if (S.vaseVisible !== false) {
+      S.vase.size = Math.max(30, Math.min(400, snapVase.size * scale));
+      S.vase.x    = b.cx + (snapVase.x - b.cx) * scale;
+      S.vase.y    = b.cy + (snapVase.y - b.cy) * scale;
+      updateVaseDisplay();
+    }
+
+    updateGroupSelect();
+  }
+
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup',   onUp);
+  }
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup',   onUp);
+}
+
+/* ============================================================
+   ROTATE — flowers & vase
+   ============================================================ */
+function onRotateMouseDown(e, uid) {
+  e.preventDefault();
+  e.stopPropagation();
+  selectItem(uid);
+
+  const isVase = uid === 'vase';
+  const item   = isVase ? S.vase : S.arrangement.find(f => f.uid === uid);
+  if (!item) return;
+
+  const el = isVase
+    ? document.getElementById('vaseDisplay')
+    : document.querySelector(`.placed-flower[data-uid="${uid}"]`);
+  if (!el) return;
+
+  const canvas = document.getElementById('arrangementCanvas');
+
+  function getCenter() {
+    const rect = canvas.getBoundingClientRect();
+    return { x: rect.left + item.x, y: rect.top + item.y };
+  }
+
+  const c0         = getCenter();
+  const startAngle = Math.atan2(e.clientY - c0.y, e.clientX - c0.x) * (180 / Math.PI);
+  const startRot   = item.rotation || 0;
+
+  function onMove(ev) {
+    const c     = getCenter();
+    const angle = Math.atan2(ev.clientY - c.y, ev.clientX - c.x) * (180 / Math.PI);
+    item.rotation = startRot + (angle - startAngle);
+    el.style.transition = 'none';
+    if (isVase) {
+      el.style.transform = `translate(-50%, -50%) rotate(${item.rotation}deg)`;
+    } else {
+      el.style.transform = flowerTransform(item.rotation, 1);
+    }
+  }
+
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup',   onUp);
+  }
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup',   onUp);
+}
+
+/* ============================================================
+   REMOVE FLOWER & CLEAR
+   ============================================================ */
+function removeFlowerByUid(uid) {
+  const idx = S.arrangement.findIndex(f => f.uid === uid);
+  if (idx !== -1) S.arrangement.splice(idx, 1);
+  const el = document.querySelector(`.placed-flower[data-uid="${uid}"]`);
+  if (el) el.remove();
+  if (S.selectedUid === uid) selectItem(null);
+  updateCanvasHint();
+  renderRightPanel();
+}
+
+function clearArrangement() {
+  S.arrangement = [];
+  document.querySelectorAll('.placed-flower').forEach(el => el.remove());
+  selectItem(null);
+  updateCanvasHint();
+  renderRightPanel();
+}
+
+function deleteVase() {
+  S.vaseVisible = false;
+  const vd = document.getElementById('vaseDisplay');
+  if (vd) vd.style.display = 'none';
+  const vf = document.getElementById('vaseFront');
+  if (vf) vf.style.display = 'none';
+  selectItem(null);
+}
+
+/* ============================================================
+   CANVAS HINT
+   ============================================================ */
+function updateCanvasHint() {
+  const hint = document.getElementById('canvasHint');
+  if (hint) hint.style.display = S.arrangement.length === 0 ? 'flex' : 'none';
+}
+
+/* ============================================================
+   STATS
+   ============================================================ */
+function updateStats() {
+  document.getElementById('scoreDisplay').textContent = S.score;
+  document.getElementById('coinsDisplay').textContent = S.coins;
+  const full  = Math.max(0, S.hearts);
+  const empty = Math.max(0, 5 - S.hearts);
+  document.getElementById('heartsDisplay').textContent =
+    '❤️'.repeat(full) + '🖤'.repeat(empty);
+}
+
+/* ============================================================
+   MODE TOGGLE
+   ============================================================ */
+function setMode(mode) {
+  S.mode = mode;
+  // Exit group mode on mode switch
+  if (S.groupMode) {
+    S.groupMode = false;
+    const gs = document.getElementById('groupSelect');
+    if (gs) gs.classList.remove('active');
+  }
+  document.getElementById('btnOrders').classList.toggle('active', mode === 'orders');
+  document.getElementById('btnFree').classList.toggle('active',   mode === 'free');
+  // Shop name tag: only visible in free mode (so it appears in screenshots)
+  const shopTag = document.getElementById('shopTag');
+  if (shopTag) shopTag.style.display = mode === 'free' ? 'block' : 'none';
+  renderRightPanel();
+  renderFlowerPalette();
+}
+
+/* ============================================================
+   SCORE POP
+   ============================================================ */
+function showScorePop(text) {
+  const el = document.createElement('div');
+  el.className   = 'score-pop';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1050);
+}
+
+/* ============================================================
+   NOTIFICATIONS
+   ============================================================ */
+function notify(icon, title, msg) {
+  const area = document.getElementById('notifArea');
+  const n    = document.createElement('div');
+  n.className = 'notif';
+  n.innerHTML =
+    `<div class="notif-icon">${icon}</div>` +
+    `<div class="notif-body">` +
+      `<div class="notif-title">${title}</div>` +
+      `<div class="notif-msg">${msg}</div>` +
+    `</div>`;
+  area.appendChild(n);
+  setTimeout(() => n.remove(), 3000);
+}
+
+/* ============================================================
+   DOWNLOAD / SAVE — canvas PNG with shop name watermark
+   ============================================================ */
+async function downloadArrangement() {
+  const canvasEl   = document.getElementById('arrangementCanvas');
+  const canvasRect = canvasEl.getBoundingClientRect();
+  const W = Math.round(canvasRect.width);
+  const H = Math.round(canvasRect.height);
+
+  const offscreen = document.createElement('canvas');
+  offscreen.width  = W;
+  offscreen.height = H;
+  const ctx = offscreen.getContext('2d');
+
+  // Ocean background gradient
+  const grad = ctx.createLinearGradient(0, 0, W * 0.15, H);
+  grad.addColorStop(0,   '#0a2a5e');
+  grad.addColorStop(0.5, '#0a6070');
+  grad.addColorStop(1,   '#0d9e8f');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Load image: try fetch→blob first (works on local server), fall back to direct src
+  async function loadImg(src) {
+    try {
+      const res = await fetch(src);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload  = () => { resolve(img); URL.revokeObjectURL(url); };
+          img.onerror = () => { resolve(null); URL.revokeObjectURL(url); };
+          img.src = url;
+        });
+      }
+    } catch { /* fetch blocked on file://, fall through */ }
+    // Direct src fallback — may taint canvas on file:// but is worth trying
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload  = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+  }
+
+  async function drawItem(src, x, y, size, rotation) {
+    const img = await loadImg(src);
+    if (!img) return;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate((rotation || 0) * Math.PI / 180);
+    ctx.drawImage(img, -size / 2, -size / 2, size, size);
+    ctx.restore();
+  }
+
+  const cData = CONTAINERS.find(c => c.id === S.selectedContainer);
+  const hasDepth = cData && cData.frontClip;
+
+  // 1. Draw vase BACK layer (behind flowers) — only for non-depth containers
+  if (S.vaseVisible !== false && cData && !hasDepth) {
+    await drawItem(cData.img, S.vase.x, S.vase.y, S.vase.size, S.vase.rotation || 0);
+  }
+
+  // 2. Draw flowers sorted by z-index
+  const sorted = [...S.arrangement].sort((a, b) => a.z - b.z);
+  for (const item of sorted) {
+    const f = FLOWERS.find(f => f.id === item.id);
+    if (f) await drawItem(f.img, item.x, item.y, item.size, item.rotation || 0);
+  }
+
+  // 3. Depth containers: draw full container ON TOP of flowers
+  //    The SVG's own transparency acts as the natural "opening" where flowers show through.
+  if (S.vaseVisible !== false && cData && hasDepth) {
+    await drawItem(cData.img, S.vase.x, S.vase.y, S.vase.size, S.vase.rotation || 0);
+  }
+
+  // 4. Shop name watermark
+  ctx.save();
+  ctx.globalAlpha = 0.7;
+  ctx.fillStyle   = '#fff';
+  ctx.font        = 'bold 13px "Courier New", monospace';
+  ctx.textAlign   = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur  = 4;
+  ctx.fillText('☀️ Gracias por comprar en Sunshine Flower Shop ☀️', W / 2, H - 10);
+  ctx.restore();
+
+  // 5. Export
+  try {
+    offscreen.toBlob(async (blob) => {
+      if (!blob) { notify('❌', 'Error', 'No se pudo crear la imagen.'); return; }
+
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: 'mi-arreglo-floral.png',
+            types: [{ description: 'Imagen PNG', accept: { 'image/png': ['.png'] } }],
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          notify('✅', '¡Guardado!', 'Tu arreglo se guardó como PNG~');
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+        }
+      }
+      // Fallback: <a download>
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href = url; a.download = 'mi-arreglo-floral.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      notify('✅', '¡Descargado!', 'Tu arreglo se guardó como PNG~');
+    }, 'image/png');
+  } catch (secErr) {
+    // Canvas tainted (file:// protocol + SVG images) — fall back to screenshot helper
+    enterScreenshotMode();
+  }
+}
+
+function enterScreenshotMode() {
+  const overlay = document.createElement('div');
+  overlay.id = 'screenshotOverlay';
+  overlay.style.cssText =
+    'position:fixed;inset:0;z-index:9500;background:linear-gradient(170deg,#0a2a5e,#0a6070 50%,#0d9e8f);' +
+    'display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;overflow:auto;padding:20px;';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'color:#ffd700;font-size:1.1rem;font-weight:800;font-family:"Courier New",monospace;text-align:center;';
+  title.textContent = '☀️ Sunshine Flower Shop — Guardar arreglo';
+
+  // Clone the canvas area with all its flowers
+  const canvasEl = document.getElementById('arrangementCanvas');
+  const canvasClone = canvasEl.cloneNode(true);
+  canvasClone.style.cssText =
+    `position:relative;width:${canvasEl.offsetWidth}px;height:${canvasEl.offsetHeight}px;` +
+    'background:linear-gradient(170deg,#0a2a5e,#0a6070 50%,#0d9e8f);' +
+    'border-radius:12px;border:2px solid rgba(255,255,255,0.2);overflow:hidden;flex-shrink:0;';
+
+  const shopTag = document.createElement('div');
+  shopTag.style.cssText = 'color:rgba(255,255,255,0.8);font-family:"Courier New",monospace;font-size:0.8rem;text-align:center;';
+  shopTag.textContent = '☀️ Gracias por comprar en Sunshine Flower Shop ☀️';
+
+  const instructions = document.createElement('div');
+  instructions.style.cssText = 'color:rgba(255,255,255,0.7);font-size:0.82rem;text-align:center;line-height:1.6;';
+  instructions.innerHTML =
+    '📸 <b style="color:#ffd700">Mac:</b> Cmd+Shift+4 → arrastra para seleccionar el arreglo<br>' +
+    '📸 <b style="color:#ffd700">Windows:</b> Win+Shift+S → selecciona el área del arreglo';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '← Volver al juego';
+  closeBtn.style.cssText =
+    'padding:10px 28px;background:linear-gradient(90deg,#ff9ec5,#b87fff);border:none;' +
+    'border-radius:50px;color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;';
+  closeBtn.onclick = () => overlay.remove();
+
+  overlay.appendChild(title);
+  overlay.appendChild(canvasClone);
+  overlay.appendChild(shopTag);
+  overlay.appendChild(instructions);
+  overlay.appendChild(closeBtn);
+  document.body.appendChild(overlay);
+}
+
+/* ============================================================
+   GAME OVER & RESTART
+   ============================================================ */
+/* ============================================================
+   CUSTOMER THANK-YOU POPUP
+   ============================================================ */
+function showCustomerPopup(customer) {
+  const popup = document.getElementById('customerPopup');
+  document.getElementById('popupAvatar').textContent = customer.emoji;
+  document.getElementById('popupName').textContent   = customer.name;
+
+  // Reset state before showing
+  popup.classList.remove('show', 'hide');
+  // Trigger reflow so transition fires
+  void popup.offsetWidth;
+  popup.classList.add('show');
+
+  // Auto-dismiss after 3s with hide animation
+  setTimeout(() => {
+    popup.classList.add('hide');
+    setTimeout(() => popup.classList.remove('show', 'hide'), 320);
+  }, 3000);
+}
+
+function gameOver() {
+  document.getElementById('goMsg').textContent =
+    '¡El mar se llevó tus flores! Perdiste todos los corazones.';
+  document.getElementById('goScore').textContent =
+    '⭐ ' + S.score + ' pts · 🪙 ' + S.coins + ' monedas · 📦 ' + S.ordersCompleted + ' pedidos';
+  document.getElementById('gameOverlay').classList.add('show');
+}
+
+function restartGame() {
+  // Reset state
+  S.coins = 0; S.score = 0; S.hearts = 5;
+  S.ordersCompleted = 0;
+  S.selectedContainer = 'c04';
+  S.currentCustomer = null; S.currentOrder = null;
+  S.queue = []; S.arrangement = [];
+  S.vase  = { x: 0, y: 0, size: 90, rotation: 0 };
+  S.vaseVisible = true;
+  S.selectedUid = null; S.zCounter = 10;
+  uidCounter = 0;
+
+  // Clear DOM flowers
+  document.querySelectorAll('.placed-flower').forEach(el => el.remove());
+
+  // Reset vase image and visibility
+  const vd   = document.getElementById('vaseDisplay');
+  const vImg = document.querySelector('#vaseDisplay .vase-img');
+  if (vImg) { vImg.src = '../assets/Contenedores/corals-04.svg'; vImg.alt = 'Conch Shell'; }
+  if (vd)   { vd.style.display = ''; vd.style.transform = 'translate(-50%, -50%) rotate(0deg)'; }
+
+  document.getElementById('gameOverlay').classList.remove('show');
+  updateStats();
+  fillQueue();
+  renderContainerOptions();
+  renderFlowerPalette();
+  updateCanvasHint();
+  renderRightPanel();
+
+  // Re-position vase after layout settles
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById('arrangementCanvas');
+    const rect   = canvas.getBoundingClientRect();
+    S.vase.x = rect.width  / 2;
+    S.vase.y = rect.height - 58;
+    updateVaseDisplay(); // also calls updateVaseFront()
+  });
+}
+
+/* ============================================================
+   KEYBOARD SHORTCUTS
+   ============================================================ */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    selectItem(null);
+  }
+  if ((e.key === 'Delete' || e.key === 'Backspace') &&
+       S.selectedUid !== null && S.selectedUid !== 'vase') {
+    // Don't intercept backspace in inputs
+    if (document.activeElement.tagName !== 'INPUT' &&
+        document.activeElement.tagName !== 'TEXTAREA') {
+      removeFlowerByUid(S.selectedUid);
+    }
+  }
+});
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
