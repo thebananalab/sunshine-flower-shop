@@ -580,6 +580,9 @@ button, .flower-card, .container-opt, .mob-tab,
 .btn-intro, .btn-action, .btn-save, .btn-select-all,
 #drawerBackdrop { touch-action: manipulation; }
 
+/* Canvas must not scroll — touch events owned by JS drag handlers */
+#arrangementCanvas { touch-action: none; }
+
 /* ============================================================
    MOBILE — hidden desktop elements
    ============================================================ */
@@ -653,9 +656,24 @@ button, .flower-card, .container-opt, .mob-tab,
   #mermaidChar { display: none; }
 
   /* Larger touch targets for handles */
-  .resize-handle       { width: 22px; height: 22px; bottom: -11px; right: -11px; }
-  .rotate-handle       { width: 22px; height: 22px; top: -30px; }
-  .group-resize-handle { width: 28px; height: 28px; bottom: -14px; right: -14px; }
+  .resize-handle       { width: 26px; height: 26px; bottom: -13px; right: -13px; }
+  .rotate-handle       { width: 26px; height: 26px; top: -32px; }
+  .group-resize-handle { width: 32px; height: 32px; bottom: -16px; right: -16px; }
+
+  /* Pseudo-element expands tap area to ≥44px without affecting layout */
+  .resize-handle::before,
+  .rotate-handle::before,
+  .group-resize-handle::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+  }
+
+  /* Delete buttons: bigger on mobile */
+  .del-btn, .vase-del-btn {
+    width: 24px; height: 24px; font-size: 0.75rem;
+    top: -12px; left: -12px;
+  }
 
   /* Flower grid: 3 columns */
   #flowerGrid { grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px; }
@@ -854,48 +872,23 @@ button, .flower-card, .container-opt, .mob-tab,
 
 <script>
 /* ============================================================
-   TOUCH SUPPORT — targeted drag bridge for canvas interactions
+   TOUCH SUPPORT UTILITIES
    ============================================================ */
-/**
- * Wraps a mousedown handler so it also fires on touchstart.
- * While the touch is active, redirects touchmove/touchend on document
- * to mousemove/mouseup so all existing drag handlers work unchanged.
- * Returns a function to use as the touchstart listener.
- */
-function touchDrag(handler) {
-  return function onTouchStart(e) {
-    const t = e.touches[0];
-    e.preventDefault(); // block scroll + native mouse-compat events during drag
-    // Build a synthetic event-like object the handler can use
-    const syn = {
-      type: 'mousedown',
-      clientX: t.clientX, clientY: t.clientY,
-      target: e.target,
-      preventDefault()  { e.preventDefault(); },
-      stopPropagation() { e.stopPropagation(); },
-    };
-    handler(syn);
 
-    // While this touch is live, forward move/end as document mouse events
-    function onTM(te) {
-      te.preventDefault();
-      const tt = te.touches[0];
-      document.dispatchEvent(new MouseEvent('mousemove', {
-        bubbles: true, cancelable: true,
-        clientX: tt.clientX, clientY: tt.clientY, view: window,
-      }));
-    }
-    function onTE(te) {
-      document.removeEventListener('touchmove', onTM);
-      document.removeEventListener('touchend',  onTE);
-      const tt = te.changedTouches[0];
-      document.dispatchEvent(new MouseEvent('mouseup', {
-        bubbles: true, cancelable: true,
-        clientX: tt.clientX, clientY: tt.clientY, view: window,
-      }));
-    }
-    document.addEventListener('touchmove', onTM, { passive: false });
-    document.addEventListener('touchend',  onTE);
+/**
+ * tc(e) — normalise a touch or mouse event into a plain object
+ * with clientX/Y, target, preventDefault, stopPropagation.
+ * Safe to call on both MouseEvent and TouchEvent.
+ */
+function tc(e) {
+  const t = e.touches?.[0] ?? e.changedTouches?.[0];
+  if (!t) return e; // already a mouse event
+  return {
+    clientX: t.clientX,
+    clientY: t.clientY,
+    target:  e.target,
+    preventDefault()  { e.preventDefault(); },
+    stopPropagation() { e.stopPropagation(); },
   };
 }
 
@@ -935,6 +928,38 @@ function closeMobileDrawer(silent) {
     document.getElementById(id)?.classList.remove('active'));
   if (!silent) document.getElementById('drawerBackdrop')?.classList.remove('show');
   _activeDrawer = null;
+}
+
+/* ============================================================
+   addDocumentDragListeners — registers both mouse AND touch
+   move/end listeners on document, and removes them in onUp.
+   Call this at the end of every "mousedown" drag starter.
+   ============================================================ */
+function addDocumentDragListeners(onMove, onUp) {
+  // Touch wrappers
+  function onTouchMove(e) {
+    e.preventDefault();
+    onMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+  }
+  function onTouchEnd(e) {
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend',  onTouchEnd);
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup',   wrappedUp);
+    onUp({ clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY });
+  }
+  function wrappedUp(e) {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup',   wrappedUp);
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend',  onTouchEnd);
+    onUp(e);
+  }
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup',   wrappedUp);
+  document.addEventListener('touchmove', onTouchMove, { passive: false });
+  document.addEventListener('touchend',  onTouchEnd);
 }
 
 /* ============================================================
@@ -1086,7 +1111,10 @@ function init() {
   // Group resize handle
   const gr = document.getElementById('groupResize');
   gr.addEventListener('mousedown', onGroupResizeMouseDown);
-  gr.addEventListener('touchstart', touchDrag(onGroupResizeMouseDown), { passive: false });
+  gr.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    onGroupResizeMouseDown(tc(e));
+  }, { passive: false });
 
   // Canvas: deselect on touch background
   canvas.addEventListener('touchstart', (e) => {
@@ -1112,27 +1140,32 @@ function initVase() {
 
   const vd = document.getElementById('vaseDisplay');
   vd.addEventListener('mousedown', onVaseMouseDown);
-  vd.addEventListener('touchstart', touchDrag(onVaseMouseDown), { passive: false });
+  vd.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    onVaseMouseDown(tc(e));
+  }, { passive: false });
 
   const vr = document.getElementById('vaseResize');
   vr.addEventListener('mousedown', (e) => {
     e.stopPropagation();
     onResizeMouseDown(e, 'vase');
   });
-  vr.addEventListener('touchstart', touchDrag((e) => {
+  vr.addEventListener('touchstart', (e) => {
+    e.preventDefault();
     e.stopPropagation();
-    onResizeMouseDown(e, 'vase');
-  }), { passive: false });
+    onResizeMouseDown(tc(e), 'vase');
+  }, { passive: false });
 
   const vRot = document.getElementById('vaseRotate');
   vRot.addEventListener('mousedown', (e) => {
     e.stopPropagation();
     onRotateMouseDown(e, 'vase');
   });
-  vRot.addEventListener('touchstart', touchDrag((e) => {
+  vRot.addEventListener('touchstart', (e) => {
+    e.preventDefault();
     e.stopPropagation();
-    onRotateMouseDown(e, 'vase');
-  }), { passive: false });
+    onRotateMouseDown(tc(e), 'vase');
+  }, { passive: false });
 
   const vDel = document.getElementById('vaseDelBtn');
   vDel.addEventListener('mousedown', (e) => { e.stopPropagation(); deleteVase(); });
@@ -1197,7 +1230,10 @@ function renderFlowerPalette() {
     card.appendChild(img);
     card.appendChild(nm);
     card.addEventListener('mousedown', (e) => onPaletteMouseDown(e, f.id));
-    card.addEventListener('touchstart', touchDrag((e) => onPaletteMouseDown(e, f.id)), { passive: false });
+    card.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      onPaletteMouseDown(tc(e), f.id);
+    }, { passive: false });
     grid.appendChild(card);
   });
 }
@@ -1530,10 +1566,11 @@ function createFlowerElement(item) {
     e.stopPropagation();
     onRotateMouseDown(e, item.uid);
   });
-  rotateHandle.addEventListener('touchstart', touchDrag((e) => {
+  rotateHandle.addEventListener('touchstart', (e) => {
+    e.preventDefault();
     e.stopPropagation();
-    onRotateMouseDown(e, item.uid);
-  }), { passive: false });
+    onRotateMouseDown(tc(e), item.uid);
+  }, { passive: false });
 
   const resizeHandle = document.createElement('div');
   resizeHandle.className = 'resize-handle';
@@ -1541,17 +1578,21 @@ function createFlowerElement(item) {
     e.stopPropagation();
     onResizeMouseDown(e, item.uid);
   });
-  resizeHandle.addEventListener('touchstart', touchDrag((e) => {
+  resizeHandle.addEventListener('touchstart', (e) => {
+    e.preventDefault();
     e.stopPropagation();
-    onResizeMouseDown(e, item.uid);
-  }), { passive: false });
+    onResizeMouseDown(tc(e), item.uid);
+  }, { passive: false });
 
   el.appendChild(img);
   el.appendChild(delBtn);
   el.appendChild(rotateHandle);
   el.appendChild(resizeHandle);
   el.addEventListener('mousedown', (e) => onFlowerMouseDown(e, item.uid));
-  el.addEventListener('touchstart', touchDrag((e) => onFlowerMouseDown(e, item.uid)), { passive: false });
+  el.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    onFlowerMouseDown(tc(e), item.uid);
+  }, { passive: false });
   return el;
 }
 
@@ -1588,8 +1629,6 @@ function onPaletteMouseDown(e, id) {
   }
 
   function onUp(ev) {
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup', onUp);
     ghost.remove();
 
     const canvas = document.getElementById('arrangementCanvas');
@@ -1602,13 +1641,12 @@ function onPaletteMouseDown(e, id) {
         placeFlower(id, cx, cy);
       }
     } else {
-      // Simple click — add at canvas center
+      // Simple click or tap — add at canvas center
       placeFlower(id, rect.width / 2, rect.height / 2 - 20);
     }
   }
 
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onUp);
+  addDocumentDragListeners(onMove, onUp);
 }
 
 /* ============================================================
@@ -1669,8 +1707,6 @@ function onFlowerMouseDown(e, uid) {
   }
 
   function onUp() {
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup', onUp);
     clearTimeout(tiltTimeout);
     if (el) {
       // Restore proper z-index (below vase front depth layer at 500)
@@ -1681,8 +1717,7 @@ function onFlowerMouseDown(e, uid) {
     }
   }
 
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onUp);
+  addDocumentDragListeners(onMove, onUp);
 }
 
 /* ============================================================
@@ -1709,12 +1744,8 @@ function onVaseMouseDown(e) {
     S.vase.y = Math.max(0, Math.min(rect.height, ny));
     if (vd) { vd.style.left = S.vase.x + 'px'; vd.style.top = S.vase.y + 'px'; }
   }
-  function onUp() {
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup', onUp);
-  }
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onUp);
+  function onUp() { /* nothing extra needed */ }
+  addDocumentDragListeners(onMove, onUp);
 }
 
 /* ============================================================
@@ -1746,12 +1777,8 @@ function onResizeMouseDown(e, uid) {
     item.size = newSize;
     if (el) { el.style.width = newSize + 'px'; el.style.height = newSize + 'px'; }
   }
-  function onUp() {
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup', onUp);
-  }
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onUp);
+  function onUp() { /* nothing extra needed */ }
+  addDocumentDragListeners(onMove, onUp);
 }
 
 /* ============================================================
@@ -1864,13 +1891,8 @@ function onGroupResizeMouseDown(e) {
     updateGroupSelect();
   }
 
-  function onUp() {
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup',   onUp);
-  }
-
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup',   onUp);
+  function onUp() { /* nothing extra needed */ }
+  addDocumentDragListeners(onMove, onUp);
 }
 
 /* ============================================================
@@ -1913,13 +1935,8 @@ function onRotateMouseDown(e, uid) {
     }
   }
 
-  function onUp() {
-    document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup',   onUp);
-  }
-
-  document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup',   onUp);
+  function onUp() { /* nothing extra needed */ }
+  addDocumentDragListeners(onMove, onUp);
 }
 
 /* ============================================================
