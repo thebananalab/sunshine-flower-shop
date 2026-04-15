@@ -141,7 +141,7 @@ header {
   /* 3 rows: 0 for fixed flower panel, 1fr for canvas, 0 for fixed right panel */
   grid-template-rows: 0px 1fr 0px;
   overflow: hidden; position: relative; z-index: 2;
-  padding-bottom: 110px; /* tab bar (62px) + action bar (~48px) */
+  padding-bottom: 62px; /* keep canvas above the fixed tab bar */
 }
 
 .panel {
@@ -289,12 +289,13 @@ header {
 
 /* ARRANGEMENT ACTIONS */
 .arrangement-actions {
-  display: flex; gap: 6px; justify-content: center; align-items: center;
-  padding: 4px 8px 8px; flex-shrink: 0;
+  display: flex; gap: 8px; justify-content: center; align-items: center;
+  padding: 7px 16px 9px; flex-shrink: 0;
+  background: rgba(5, 10, 35, 0.88); border-top: 1px solid rgba(255,255,255,0.1);
 }
 .btn-action {
-  padding: 7px 12px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.73rem;
-  font-weight: 600; transition: all 0.15s;
+  padding: 9px 20px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.8rem;
+  font-weight: 700; transition: all 0.15s;
 }
 .btn-clear { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
 .btn-clear:hover { background: rgba(255,100,100,0.25); color: #fff; }
@@ -648,17 +649,6 @@ button, .flower-card, .container-opt, .mob-tab,
 .mob-tab.active { color: #ffd700; }
 .mob-tab-sep { width: 1px; background: rgba(255,255,255,0.08); margin: 14px 0; flex-shrink: 0; }
 
-/* Action buttons: fixed bar on mobile, just above the tab bar */
-.arrangement-actions {
-  position: fixed; bottom: 62px; left: 0; right: 0;
-  z-index: 350;
-  background: rgba(5, 10, 35, 0.92); backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255,255,255,0.12);
-  padding: 7px 16px 9px;
-  display: flex; gap: 10px; justify-content: center; align-items: center;
-  flex-shrink: 0;
-}
-
 /* ============================================================
    DESKTOP (≥ 721px) — full layout overrides
    ============================================================ */
@@ -683,12 +673,8 @@ button, .flower-card, .container-opt, .mob-tab,
   #flowerGrid { grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; }
   .flower-card img { width: 40px; height: 40px; }
 
-  /* Action buttons: back to normal flow on desktop */
-  .arrangement-actions {
-    position: static; bottom: auto; left: auto; right: auto; z-index: auto;
-    background: none; backdrop-filter: none; border-top: none;
-    gap: 8px; padding: 6px 12px 8px;
-  }
+  /* Action buttons: clean look on desktop (no bottom-bar treatment) */
+  .arrangement-actions { background: none; border-top: none; gap: 8px; padding: 6px 12px 8px; }
   .btn-action { padding: 8px 18px; font-size: 0.8rem; }
 
   /* Delete buttons: smaller on desktop (mouse precision) */
