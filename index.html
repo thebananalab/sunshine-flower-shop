@@ -140,7 +140,8 @@ header {
   grid-row: 2; display: grid; grid-template-columns: 1fr;
   /* 3 rows: 0 for fixed flower panel, 1fr for canvas, 0 for fixed right panel */
   grid-template-rows: 0px 1fr 0px;
-  overflow: hidden; position: relative; z-index: 2;
+  /* No overflow:hidden on mobile — it clips hit-areas of position:fixed drawers on iOS Safari */
+  overflow: visible; position: relative; z-index: 2;
   padding-bottom: 62px; /* keep canvas above the fixed tab bar */
 }
 
@@ -398,8 +399,8 @@ header {
    BOTTOM BAR — fixed bottom drawer on mobile
    ============================================================ */
 footer {
-  position: fixed; left: 0; right: 0; bottom: 110px;
-  max-height: calc(100vh - 168px); z-index: 300;
+  position: fixed; left: 0; right: 0; bottom: 62px;
+  max-height: calc(100vh - 120px); z-index: 300;
   border-radius: 18px 18px 0 0;
   border: 1px solid rgba(255,255,255,0.15);
   transform: translateY(110%);
@@ -610,8 +611,8 @@ button, .flower-card, .container-opt, .mob-tab,
    ============================================================ */
 #flowerPanel,
 #rightPanel {
-  position: fixed; left: 0; right: 0; bottom: 110px;
-  max-height: calc(100vh - 168px); z-index: 300;
+  position: fixed; left: 0; right: 0; bottom: 62px;
+  max-height: calc(100vh - 120px); z-index: 300;
   border-radius: 18px 18px 0 0;
   border: 1px solid rgba(255,255,255,0.15);
   transform: translateY(110%);
@@ -667,7 +668,7 @@ button, .flower-card, .container-opt, .mob-tab,
   .mode-btn { padding: 5px 14px; font-size: 0.78rem; }
 
   /* Main: 3-column layout — reset mobile overrides */
-  .main-area { grid-template-columns: 220px 1fr 265px; grid-template-rows: auto; padding-bottom: 0; }
+  .main-area { grid-template-columns: 220px 1fr 265px; grid-template-rows: auto; overflow: hidden; padding-bottom: 0; }
 
   /* Flower grid: 2 columns, larger images */
   #flowerGrid { grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; }
@@ -1304,6 +1305,7 @@ function renderContainerOptions() {
     opt.appendChild(img);
     opt.appendChild(sp);
     opt.addEventListener('click', () => selectContainer(c.id));
+    opt.addEventListener('touchend', (e) => { e.preventDefault(); selectContainer(c.id); }, { passive: false });
     bar.appendChild(opt);
   });
 }
