@@ -890,10 +890,12 @@ button, .flower-card, .container-opt, .mob-tab,
       <span class="ti">🏺</span>Contenedor
     </button>
   </div>
-</div>
 
-<!-- DRAWER BACKDROP (mobile) -->
-<div id="drawerBackdrop" onclick="closeMobileDrawer()"></div>
+  <!-- DRAWER BACKDROP — must be inside #game so it shares the same stacking context
+       as the drawers (z-index 300). Outside #game (z-index:1), backdrop (z-index:299)
+       would sit above the entire game layer and block all drawer taps. -->
+  <div id="drawerBackdrop" onclick="closeMobileDrawer()"></div>
+</div>
 
 <!-- NOTIFICATIONS -->
 <div id="notifArea"></div>
