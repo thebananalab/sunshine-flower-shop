@@ -137,11 +137,12 @@ header {
    MAIN PANELS
    ============================================================ */
 .main-area {
-  grid-row: 2; display: grid; grid-template-columns: 1fr;
-  /* 3 rows: 0 for fixed flower panel, 1fr for canvas, 0 for fixed right panel */
-  grid-template-rows: 0px 1fr 0px;
-  /* No overflow:hidden on mobile — it clips hit-areas of position:fixed drawers on iOS Safari */
-  /* No z-index — removing it prevents a stacking context that would trap drawers below the backdrop */
+  grid-row: 2; display: flex; flex-direction: column;
+  /* Flex instead of grid: avoids fixed-element grid auto-placement ambiguity.
+     flowerPanel/rightPanel are position:fixed (out of flow), so only canvasPanel
+     participates as a flex item and correctly fills the available height. */
+  /* No overflow:hidden — clips hit-areas of position:fixed drawers on iOS Safari */
+  /* No z-index — prevents a stacking context that traps drawers below the backdrop */
   overflow: visible; position: relative;
   padding-bottom: 62px; /* keep canvas above the fixed tab bar */
 }
@@ -194,6 +195,7 @@ header {
 /* CENTER — CANVAS */
 #canvasPanel {
   background: transparent !important; border: none !important; position: relative; overflow: visible;
+  flex: 1; min-height: 0; /* on mobile: fill the flex main-area so canvas-wrap height:100% resolves correctly */
 }
 .canvas-wrap {
   display: flex; flex-direction: column; height: 100%; gap: 0;
@@ -669,7 +671,7 @@ button, .flower-card, .container-opt, .mob-tab,
   .mode-btn { padding: 5px 14px; font-size: 0.78rem; }
 
   /* Main: 3-column layout — reset mobile overrides */
-  .main-area { grid-template-columns: 220px 1fr 265px; grid-template-rows: auto; overflow: hidden; padding-bottom: 0; }
+  .main-area { display: grid; grid-template-columns: 220px 1fr 265px; grid-template-rows: auto; overflow: hidden; padding-bottom: 0; }
 
   /* Flower grid: 2 columns, larger images */
   #flowerGrid { grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; }
