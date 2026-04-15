@@ -137,9 +137,11 @@ header {
    MAIN PANELS
    ============================================================ */
 .main-area {
-  grid-row: 2; display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr;
+  grid-row: 2; display: grid; grid-template-columns: 1fr;
+  /* 3 rows: 0 for fixed flower panel, 1fr for canvas, 0 for fixed right panel */
+  grid-template-rows: 0px 1fr 0px;
   overflow: hidden; position: relative; z-index: 2;
-  padding-bottom: 62px; /* clear fixed tab bar */
+  padding-bottom: 62px; /* keep canvas above the fixed tab bar */
 }
 
 .panel {
@@ -190,9 +192,6 @@ header {
 /* CENTER — CANVAS */
 #canvasPanel {
   background: transparent !important; border: none !important; position: relative; overflow: visible;
-  /* Always occupies its grid cell fully */
-  grid-column: 1; grid-row: 1;
-  min-height: 0;
 }
 .canvas-wrap {
   display: flex; flex-direction: column; height: 100%; gap: 0;
@@ -668,7 +667,6 @@ button, .flower-card, .container-opt, .mob-tab,
 
   /* Main: 3-column layout — reset mobile overrides */
   .main-area { grid-template-columns: 220px 1fr 265px; grid-template-rows: auto; padding-bottom: 0; }
-  #canvasPanel { grid-column: auto; grid-row: auto; min-height: unset; }
 
   /* Flower grid: 2 columns, larger images */
   #flowerGrid { grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; }
@@ -795,17 +793,17 @@ button, .flower-card, .container-opt, .mob-tab,
 <div id="game">
   <!-- Coral decorations (fixed, behind everything) -->
   <div id="coralDeco">
-    <img src="../assets/Fondo/corals-07.svg" alt="">
-    <img src="../assets/Fondo/corals-08.svg" alt="">
-    <img src="../assets/Fondo/corals-14.svg" alt="">
-    <img src="../assets/Fondo/corals-17.svg" alt="">
-    <img src="../assets/Fondo/corals-18.svg" alt="">
-    <img src="../assets/Fondo/corals-19.svg" alt="">
-    <img src="../assets/Fondo/corals-20.svg" alt="">
+    <img src="assets/Fondo/corals-07.svg" alt="">
+    <img src="assets/Fondo/corals-08.svg" alt="">
+    <img src="assets/Fondo/corals-14.svg" alt="">
+    <img src="assets/Fondo/corals-17.svg" alt="">
+    <img src="assets/Fondo/corals-18.svg" alt="">
+    <img src="assets/Fondo/corals-19.svg" alt="">
+    <img src="assets/Fondo/corals-20.svg" alt="">
   </div>
 
   <!-- Floating mermaid character -->
-  <div id="mermaidChar"><img id="mermaidImg" src="../assets/character/mermaid-1.svg" alt="Mermaid"></div>
+  <div id="mermaidChar"><img id="mermaidImg" src="assets/Character/mermaid-1.svg" alt="Mermaid"></div>
 
   <!-- HEADER -->
   <header>
@@ -845,7 +843,7 @@ button, .flower-card, .container-opt, .mob-tab,
           </div>
           <!-- Vase -->
           <div id="vaseDisplay">
-            <img class="vase-img" src="../assets/Contenedores/corals-04.svg" draggable="false" alt="Conch Shell">
+            <img class="vase-img" src="assets/Contenedores/corals-04.svg" draggable="false" alt="Conch Shell">
             <button class="vase-del-btn" id="vaseDelBtn">✕</button>
             <div class="rotate-handle" id="vaseRotate"></div>
             <div class="resize-handle" id="vaseResize"></div>
@@ -1012,39 +1010,39 @@ function addDocumentDragListeners(onMove, onUp) {
    DATA
    ============================================================ */
 const FLOWERS = [
-  { id:'f01', name:'Sea Anemone',    img:'../assets/Plantas-flores/corals-01.svg', color:'#ff69b4' },
-  { id:'f02', name:'Coral Bloom',    img:'../assets/Plantas-flores/corals-02.svg', color:'#ff6b35' },
-  { id:'f03', name:'Sea Grass',      img:'../assets/Plantas-flores/corals-03.svg', color:'#4caf50' },
-  { id:'f05', name:'Pearl Blossom',  img:'../assets/Plantas-flores/corals-05.svg', color:'#e8e8f0' },
-  { id:'f06', name:'Sea Lavender',   img:'../assets/Plantas-flores/corals-06.svg', color:'#9b59b6' },
-  { id:'f09', name:'Bubble Flower',  img:'../assets/Plantas-flores/corals-09.svg', color:'#87ceeb' },
-  { id:'f10', name:'Star Bloom',     img:'../assets/Plantas-flores/corals-10.svg', color:'#ffd700' },
-  { id:'f11', name:'Jelly Bell',     img:'../assets/Plantas-flores/corals-11.svg', color:'#da70d6' },
-  { id:'f12', name:'Ocean Rose',     img:'../assets/Plantas-flores/corals-12.svg', color:'#e74c3c' },
-  { id:'f15', name:'Tide Lily',      img:'../assets/Plantas-flores/corals-15.svg', color:'#f39c12' },
-  { id:'f22', name:'Reef Orchid',    img:'../assets/Plantas-flores/corals-22.svg', color:'#8e44ad' },
-  { id:'f23', name:'Wave Peony',     img:'../assets/Plantas-flores/corals-23.svg', color:'#e91e8c' },
-  { id:'f24', name:'Shell Daisy',    img:'../assets/Plantas-flores/corals-24.svg', color:'#fff176' },
-  { id:'f25', name:'Foam Tulip',     img:'../assets/Plantas-flores/corals-25.svg', color:'#b2dfdb' },
-  { id:'f28', name:'Coral Fern',     img:'../assets/Plantas-flores/corals-28.svg', color:'#388e3c' },
-  { id:'f33', name:'Deep Violet',    img:'../assets/Plantas-flores/corals-33.svg', color:'#5c6bc0' },
-  { id:'f35', name:"Mermaid's Kiss", img:'../assets/Plantas-flores/corals-35.svg', color:'#f48fb1' },
-  { id:'f36', name:'Sea Poppy',      img:'../assets/Plantas-flores/corals-36.svg', color:'#ef5350' },
+  { id:'f01', name:'Sea Anemone',    img:'assets/Plantas-flores/corals-01.svg', color:'#ff69b4' },
+  { id:'f02', name:'Coral Bloom',    img:'assets/Plantas-flores/corals-02.svg', color:'#ff6b35' },
+  { id:'f03', name:'Sea Grass',      img:'assets/Plantas-flores/corals-03.svg', color:'#4caf50' },
+  { id:'f05', name:'Pearl Blossom',  img:'assets/Plantas-flores/corals-05.svg', color:'#e8e8f0' },
+  { id:'f06', name:'Sea Lavender',   img:'assets/Plantas-flores/corals-06.svg', color:'#9b59b6' },
+  { id:'f09', name:'Bubble Flower',  img:'assets/Plantas-flores/corals-09.svg', color:'#87ceeb' },
+  { id:'f10', name:'Star Bloom',     img:'assets/Plantas-flores/corals-10.svg', color:'#ffd700' },
+  { id:'f11', name:'Jelly Bell',     img:'assets/Plantas-flores/corals-11.svg', color:'#da70d6' },
+  { id:'f12', name:'Ocean Rose',     img:'assets/Plantas-flores/corals-12.svg', color:'#e74c3c' },
+  { id:'f15', name:'Tide Lily',      img:'assets/Plantas-flores/corals-15.svg', color:'#f39c12' },
+  { id:'f22', name:'Reef Orchid',    img:'assets/Plantas-flores/corals-22.svg', color:'#8e44ad' },
+  { id:'f23', name:'Wave Peony',     img:'assets/Plantas-flores/corals-23.svg', color:'#e91e8c' },
+  { id:'f24', name:'Shell Daisy',    img:'assets/Plantas-flores/corals-24.svg', color:'#fff176' },
+  { id:'f25', name:'Foam Tulip',     img:'assets/Plantas-flores/corals-25.svg', color:'#b2dfdb' },
+  { id:'f28', name:'Coral Fern',     img:'assets/Plantas-flores/corals-28.svg', color:'#388e3c' },
+  { id:'f33', name:'Deep Violet',    img:'assets/Plantas-flores/corals-33.svg', color:'#5c6bc0' },
+  { id:'f35', name:"Mermaid's Kiss", img:'assets/Plantas-flores/corals-35.svg', color:'#f48fb1' },
+  { id:'f36', name:'Sea Poppy',      img:'assets/Plantas-flores/corals-36.svg', color:'#ef5350' },
 ];
 
 // frontClip: fraction of container height (from top) that renders IN FRONT of flowers,
 // simulating a vase/bottle/jar "mouth" through which flowers appear to emerge.
 const CONTAINERS = [
-  { id:'c04', name:'Conch Shell',  img:'../assets/Contenedores/corals-04.svg' },
-  { id:'c13', name:'Giant Clam',   img:'../assets/Contenedores/corals-13.svg' },
-  { id:'c16', name:'Coral Pot',    img:'../assets/Contenedores/corals-16.svg', frontClip: 0.18 },
-  { id:'c26', name:'Sea Bottle',   img:'../assets/Contenedores/corals-26.svg', frontClip: 0.32 },
-  { id:'c27', name:'Urchin Vase',  img:'../assets/Contenedores/corals-27.svg', frontClip: 0.24 },
-  { id:'c29', name:'Star Bowl',    img:'../assets/Contenedores/corals-29.svg' },
-  { id:'c30', name:'Drift Jar',    img:'../assets/Contenedores/corals-30.svg', frontClip: 0.22 },
-  { id:'c31', name:'Pebble Vase',  img:'../assets/Contenedores/corals-31.svg', frontClip: 0.20 },
-  { id:'c32', name:'Kelp Basket',  img:'../assets/Contenedores/corals-32.svg' },
-  { id:'c34', name:'Crystal Pot',  img:'../assets/Contenedores/corals-34.svg', frontClip: 0.22 },
+  { id:'c04', name:'Conch Shell',  img:'assets/Contenedores/corals-04.svg' },
+  { id:'c13', name:'Giant Clam',   img:'assets/Contenedores/corals-13.svg' },
+  { id:'c16', name:'Coral Pot',    img:'assets/Contenedores/corals-16.svg', frontClip: 0.18 },
+  { id:'c26', name:'Sea Bottle',   img:'assets/Contenedores/corals-26.svg', frontClip: 0.32 },
+  { id:'c27', name:'Urchin Vase',  img:'assets/Contenedores/corals-27.svg', frontClip: 0.24 },
+  { id:'c29', name:'Star Bowl',    img:'assets/Contenedores/corals-29.svg' },
+  { id:'c30', name:'Drift Jar',    img:'assets/Contenedores/corals-30.svg', frontClip: 0.22 },
+  { id:'c31', name:'Pebble Vase',  img:'assets/Contenedores/corals-31.svg', frontClip: 0.20 },
+  { id:'c32', name:'Kelp Basket',  img:'assets/Contenedores/corals-32.svg' },
+  { id:'c34', name:'Crystal Pot',  img:'assets/Contenedores/corals-34.svg', frontClip: 0.22 },
 ];
 
 const CUSTOMERS = [
@@ -1136,7 +1134,7 @@ function init() {
   setInterval(() => {
     mermaidFrame = mermaidFrame === 1 ? 2 : 1;
     const img = document.getElementById('mermaidImg');
-    if (img) img.src = `../assets/character/mermaid-${mermaidFrame}.svg`;
+    if (img) img.src = `assets/Character/mermaid-${mermaidFrame}.svg`;
   }, 650);
 
   // Canvas background click → deselect (and exit group mode)
@@ -1384,7 +1382,7 @@ function renderRightPanel() {
     panel.innerHTML = `
       <div class="free-panel">
         <h3>🎨 Modo Libre</h3>
-        <img id="freeMermaidImg" src="../assets/character/mermaid-1.svg"
+        <img id="freeMermaidImg" src="assets/Character/mermaid-1.svg"
              style="width:80px;height:auto;animation:float 3s ease-in-out infinite;" alt="Mermaid">
         <div style="font-size:0.9rem; font-weight:700; color:rgba(255,255,255,0.9);">¡Crea libremente!</div>
         <p>Sin pedidos ni reglas~ Arrastra flores, mueve y redimensiona todo, y cuando estés lista...</p>
@@ -2303,7 +2301,7 @@ function restartGame() {
   // Reset vase image and visibility
   const vd   = document.getElementById('vaseDisplay');
   const vImg = document.querySelector('#vaseDisplay .vase-img');
-  if (vImg) { vImg.src = '../assets/Contenedores/corals-04.svg'; vImg.alt = 'Conch Shell'; }
+  if (vImg) { vImg.src = 'assets/Contenedores/corals-04.svg'; vImg.alt = 'Conch Shell'; }
   if (vd)   { vd.style.display = ''; vd.style.transform = 'translate(-50%, -50%) rotate(0deg)'; }
 
   document.getElementById('gameOverlay').classList.remove('show');
