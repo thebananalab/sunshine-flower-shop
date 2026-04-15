@@ -137,8 +137,9 @@ header {
    MAIN PANELS
    ============================================================ */
 .main-area {
-  grid-row: 2; display: grid; grid-template-columns: 1fr;
+  grid-row: 2; display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr;
   overflow: hidden; position: relative; z-index: 2;
+  padding-bottom: 62px; /* clear fixed tab bar */
 }
 
 .panel {
@@ -189,6 +190,9 @@ header {
 /* CENTER — CANVAS */
 #canvasPanel {
   background: transparent !important; border: none !important; position: relative; overflow: visible;
+  /* Always occupies its grid cell fully */
+  grid-column: 1; grid-row: 1;
+  min-height: 0;
 }
 .canvas-wrap {
   display: flex; flex-direction: column; height: 100%; gap: 0;
@@ -662,8 +666,9 @@ button, .flower-card, .container-opt, .mob-tab,
   .stat { padding: 4px 10px; font-size: 0.85rem; }
   .mode-btn { padding: 5px 14px; font-size: 0.78rem; }
 
-  /* Main: 3-column layout */
-  .main-area { grid-template-columns: 220px 1fr 265px; }
+  /* Main: 3-column layout — reset mobile overrides */
+  .main-area { grid-template-columns: 220px 1fr 265px; grid-template-rows: auto; padding-bottom: 0; }
+  #canvasPanel { grid-column: auto; grid-row: auto; min-height: unset; }
 
   /* Flower grid: 2 columns, larger images */
   #flowerGrid { grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; }
@@ -1666,7 +1671,11 @@ function onPaletteMouseDown(e, id) {
     ghost.style.transform = `translate(-50%,-50%) rotate(${tilt}deg)`;
 
     const dx = ev.clientX - startX, dy = ev.clientY - startY;
-    if (!dragging && Math.sqrt(dx*dx + dy*dy) > 6) dragging = true;
+    if (!dragging && Math.sqrt(dx*dx + dy*dy) > 6) {
+      dragging = true;
+      // On mobile: reveal canvas immediately so user can see where to drop
+      if (_activeDrawer) closeMobileDrawer();
+    }
   }
 
   function onUp(ev) {
